@@ -3,11 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Python Code Editor</title>
+    <title>Compyle Python compiler</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/pyodide/v0.22.0/full/pyodide.js"></script>
 </head>
 <body>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-icon"></div>
+        <div class="loading-text">Initializing Compyler</div>
+    </div>
 
     <div class="download-container">
         <button id="downloadButton" onclick="downloadCode()">Download</button>
@@ -26,7 +32,7 @@
             <!-- Code Editor Panel -->
             <div class="editor-panel">
                 <h2 id="currentFileName">File: main.py</h2>
-                <textarea id="editor" placeholder="Write your Python code here..."></textarea>
+                <textarea id="editor" placeholder="Your python code goes here…"></textarea>
                 <button onclick="runCode()">Run</button>
             </div>
 
