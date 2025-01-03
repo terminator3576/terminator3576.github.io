@@ -119,6 +119,7 @@ function saveCurrentFileCode() {
 // Save all files to localStorage
 function saveFilesToStorage() {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(files)); // Save the entire files object to localStorage
+    alert(`File "${fileName}" saved to local storage!`);
 }
 
 // Clear editor
