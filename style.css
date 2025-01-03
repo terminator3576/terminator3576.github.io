@@ -152,27 +152,6 @@ button:hover {
     color: #ff5555; /* Red hover effect for delete button */
 }
 
-.download-container {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-}
-
-#downloadButton {
-    padding: 10px 20px;
-    font-size: 14px;
-    font-weight: bold;
-    border: none;
-    border-radius: 5px;
-    background-color: #007bff;
-    color: #f4f4f4;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-#downloadButton:hover {
-    background-color: #0056b3;
-}
 
 /* Style for the loading overlay */
 .loading-overlay {
@@ -238,3 +217,22 @@ button:hover {
     z-index: 1000;
 }
 
+        /* Position the icons in the top-right corner */
+.icon-container {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 10px;
+    z-index: 1000;
+}
+
+.icon-button {
+    width: 40px; /* Adjust size as needed */
+    height: auto;
+    cursor: pointer;
+}
+
+.icon-button:hover {
+    opacity: 0.8; /* Optional hover effect */
+}
