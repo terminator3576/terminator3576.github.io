@@ -102,10 +102,24 @@ function openFile(fileName) {
     document.getElementById('editor').value = files[fileName];
 }
 
+// Save the current code to localStorage (specific file code)
+function saveCurrentFileCode() {
+    const code = document.getElementById("editor").value; // Get the code from the editor
+    const fileName = document.getElementById("currentFileName").innerText.replace("File: ", ""); // Get the current file name
+
+    // Save the code and file name to localStorage
+    localStorage.setItem(fileName, code);
+
+    // Also update the `files` object so it's in sync
+    files[fileName] = code;
+
+    alert(`File "${fileName}" saved to local storage!`);
+}
+
 // Save all files to localStorage
 function saveAllFiles() {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(files)); // Save the entire files object to localStorage
-    alert(`Code succesfully saved!`);
+    alert("Saved")
 }
 
 // Clear editor
@@ -175,3 +189,31 @@ function downloadCode() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 }
+
+// Upload file handling (via an input field)
+function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        const fileName = file.name;
+        const fileContent = e.target.result;
+
+        // Add the uploaded file to the `files` object
+        files[fileName] = fileContent;
+
+        // Save the new file to localStorage
+        saveFilesToStorage();
+
+        // Update the UI with the new file
+        createFileListItem(fileName);
+        openFile(fileName);  // Automatically open the uploaded file
+    };
+
+    reader.readAsText(file);
+}
+
+// File input event listener
+document.getElementById('fileInput').addEventListener('change', handleFileUpload);
