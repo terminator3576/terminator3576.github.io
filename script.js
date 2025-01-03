@@ -2,6 +2,7 @@
 let pyodide = null;
 let files = {}; // This will hold the code of each file
 let currentFile = null;
+let timeout;
 
 // Load Pyodide and sync files from localStorage
 async function loadPyodideAndSetup() {
@@ -90,33 +91,35 @@ function clearEditor() {
     currentFile = null;
 }
 
-// Run Python code
 async function runCode() {
-    const code = document.getElementById('editor').value;
+    const editor = document.getElementById('editor');
+    const output = document.getElementById('output');
+    const code = editor.value;
+    const timeLimit = 5000; // 5 seconds timeout for the Python code execution
+
+    // Clear previous output
+    output.textContent = "Running your code...";
+
+    // Initialize Pyodide
+    await loadPyodide();
 
     try {
-        // Redirect Python's stdout to a custom buffer
-        await pyodide.runPythonAsync(`
-            import sys
-            from io import StringIO
-            sys.stdout = StringIO()  # Redirect stdout
-        `);
+        // Set a timeout to stop the code if it takes too long
+        timeout = setTimeout(() => {
+            throw new Error("Code execution timed out due to infinite loop or long running process.");
+        }, timeLimit);
 
-        // Execute the user's code
-        await pyodide.runPythonAsync(code);
-
-        // Get the captured output from the custom buffer
-        const output = await pyodide.runPythonAsync(`
-            sys.stdout.getvalue()
-        `);
-
-        // Display the output
-        document.getElementById('output').textContent = output;
-
-    } catch (err) {
-        // Display any errors
-        console.error("Execution error:", err);
-        document.getElementById('output').textContent = `Error: ${err.message}`;
+        // Run the Python code using Pyodide
+        let result = await pyodide.runPythonAsync(code);
+        
+        // If successful, output the result
+        output.textContent = result;
+    } catch (error) {
+        // Catch and display any errors (including timeout error)
+        output.textContent = `Error: ${error.message}`;
+    } finally {
+        // Clear the timeout if the code finishes successfully
+        clearTimeout(timeout);
     }
 }
 
