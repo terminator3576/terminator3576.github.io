@@ -41,7 +41,6 @@ function createFile(fileName = null, isInitial = false) {
         return;
     }
     files[fileName] = isInitial ? 'print("Hello world")' : ''; // Default code or empty
-    saveFilesToStorage();  // Save the files to localStorage
     createFileListItem(fileName);
 }
 
@@ -72,7 +71,6 @@ function createFileListItem(fileName) {
 function deleteFile(fileName) {
     if (confirm(`Delete "${fileName}"?`)) {
         delete files[fileName];
-        saveFilesToStorage();  // Update localStorage after deletion
         updateFileList();
     }
 }
