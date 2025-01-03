@@ -4,15 +4,9 @@ let currentFile = null;
 
 // Load Pyodide
 async function loadPyodideAndSetup() {
-    try {
-        console.log("Loading Pyodide...");
-        pyodide = await loadPyodide();
-        console.log("Pyodide loaded successfully.");
-        createFile('main.py', true);
-        openFile('main.py');
-    } catch (err) {
-        console.error("Error loading Pyodide:", err);
-    }
+    pyodide = await loadPyodide();
+    createFile('main.py', true);
+    openFile('main.py');
 }
 
 window.onload = loadPyodideAndSetup;
@@ -47,7 +41,6 @@ function createFile(fileName = null, isInitial = false) {
 
     // Add file item to the file list
     fileList.appendChild(fileItem);
-    console.log(`File created: ${fileName}`);
 }
 
 
@@ -86,7 +79,6 @@ document.getElementById('editor').addEventListener('input', () => {
 // Run Python code
 async function runCode() {
     const code = document.getElementById('editor').value;
-    console.log("Executing Python code:", code);
 
     try {
         // Redirect Python's stdout to a custom buffer
@@ -105,7 +97,6 @@ async function runCode() {
         `);
 
         // Display the output
-        console.log("Execution output:", output);
         document.getElementById('output').textContent = output;
 
     } catch (err) {
