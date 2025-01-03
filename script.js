@@ -28,7 +28,7 @@ function createFile(fileName = null, isInitial = false) {
         console.warn(`File creation skipped: ${fileName ? `"${fileName}" already exists.` : "Invalid file name."}`);
         return;
     }
-    files[fileName] = isInitial ? '# Main Python file' : '';
+    files[fileName] = isInitial ? 'print("Hello world")' : '';
 
     const fileItem = document.createElement('li');
     fileItem.className = 'file-item';
