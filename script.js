@@ -1,6 +1,6 @@
 // Global variables
 let pyodide = null;
-let files = {};
+let files = {}; // This will hold the code of each file
 let currentFile = null;
 const LOCAL_STORAGE_KEY = "savedFiles";
 
@@ -37,7 +37,7 @@ window.onload = loadPyodideAndSetup;
 // Sync files with localStorage
 function syncFilesWithStorage() {
     const savedFiles = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || {};
-    Object.assign(files, savedFiles);
+    Object.assign(files, savedFiles); // Merge saved files with the current files object
     updateFileList();
 }
 
@@ -57,8 +57,8 @@ function createFile(fileName = null, isInitial = false) {
         console.warn(`File creation skipped: ${fileName ? `"${fileName}" already exists.` : "Invalid file name."}`);
         return;
     }
-    files[fileName] = isInitial ? 'print("Hello world")' : '';
-    saveFilesToStorage();  // Save the files after creation
+    files[fileName] = isInitial ? 'print("Hello world")' : ''; // Default code or empty
+    saveFilesToStorage();  // Save the files to localStorage
     createFileListItem(fileName);
 }
 
@@ -102,13 +102,16 @@ function openFile(fileName) {
     document.getElementById('editor').value = files[fileName];
 }
 
-// Function to save the code to local storage
-function saveAllFiles() {
+// Save the current code to localStorage (specific file code)
+function saveCurrentFileCode() {
     const code = document.getElementById("editor").value; // Get the code from the editor
     const fileName = document.getElementById("currentFileName").innerText.replace("File: ", ""); // Get the current file name
 
     // Save the code and file name to localStorage
     localStorage.setItem(fileName, code);
+
+    // Also update the `files` object so it's in sync
+    files[fileName] = code;
 
     alert(`File "${fileName}" saved to local storage!`);
 }
