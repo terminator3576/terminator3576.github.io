@@ -2,22 +2,30 @@
 let pyodide = null;
 let files = {}; // This will hold the code of each file
 let currentFile = null;
+let editorInstance = null;
 
-// Load Pyodide and sync files from localStorage
+// Load Pyodide and initialize CodeMirror
 async function loadPyodideAndSetup() {
-
-    // Show the loading overlay
     const loadingOverlay = document.getElementById('loadingOverlay');
     loadingOverlay.classList.add('visible');
 
     try {
         pyodide = await loadPyodide();
+
+        // Initialize CodeMirror
+        const editorElement = document.getElementById('editor');
+        editorInstance = CodeMirror.fromTextArea(editorElement, {
+            mode: 'python',
+            lineNumbers: true,
+            theme: 'material-darker', 
+        });
+
+
         if (!Object.keys(files).length) {
-            createFile('main.py', true); // Create a default file if no files exist
+            createFile('main.py', true);
         }
-        openFile(Object.keys(files)[0]); // Open the first file
+        openFile(Object.keys(files)[0]);
     } finally {
-        // Hide the loading overlay
         loadingOverlay.classList.remove('visible');
     }
 }
@@ -67,6 +75,11 @@ function createFileListItem(fileName) {
     fileList.appendChild(fileItem);
 }
 
+function saveCurrentFile() {
+    if (!currentFile) return;
+    files[currentFile] = editorInstance.getValue();
+}
+
 // Delete a file
 function deleteFile(fileName) {
     if (confirm(`Delete "${fileName}"?`)) {
@@ -80,7 +93,7 @@ function openFile(fileName) {
     if (!files[fileName]) return;
     currentFile = fileName;
     document.getElementById('currentFileName').textContent = `File: ${fileName}`;
-    document.getElementById('editor').value = files[fileName];
+    editorInstance.setValue(files[fileName]);
 }
 
 // Clear editor
@@ -91,29 +104,19 @@ function clearEditor() {
 }
 
 async function runCode() {
-    const code = document.getElementById('editor').value;
+    saveCurrentFile(); // Save current content
+    const code = files[currentFile];
 
     try {
-        // Redirect Python's stdout to a custom buffer
         await pyodide.runPythonAsync(`
             import sys
             from io import StringIO
-            sys.stdout = StringIO()  # Redirect stdout
+            sys.stdout = StringIO()
         `);
-
-        // Execute the user's code
         await pyodide.runPythonAsync(code);
-
-        // Get the captured output from the custom buffer
-        const output = await pyodide.runPythonAsync(`
-            sys.stdout.getvalue()
-        `);
-
-        // Display the output
+        const output = await pyodide.runPythonAsync(`sys.stdout.getvalue()`);
         document.getElementById('output').textContent = output;
-
     } catch (err) {
-        // Display any errors
         console.error("Execution error:", err);
         document.getElementById('output').textContent = `Error: ${err.message}`;
     }
