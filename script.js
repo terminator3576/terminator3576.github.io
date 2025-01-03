@@ -102,22 +102,8 @@ function openFile(fileName) {
     document.getElementById('editor').value = files[fileName];
 }
 
-// Save the current code to localStorage (specific file code)
-function saveCurrentFileCode() {
-    const code = document.getElementById("editor").value; // Get the code from the editor
-    const fileName = document.getElementById("currentFileName").innerText.replace("File: ", ""); // Get the current file name
-
-    // Save the code and file name to localStorage
-    localStorage.setItem(fileName, code);
-
-    // Also update the `files` object so it's in sync
-    files[fileName] = code;
-
-    alert(`File "${fileName}" saved to local storage!`);
-}
-
 // Save all files to localStorage
-function saveFilesToStorage() {
+function saveAllFiles() {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(files)); // Save the entire files object to localStorage
     alert(`File "${fileName}" saved to local storage!`);
 }
