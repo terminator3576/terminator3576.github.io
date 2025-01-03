@@ -76,6 +76,8 @@ textarea {
     color: #f4f4f4;
     resize: none;
     margin-bottom: 20px;
+    display: none; 
+
 }
 
 button {
