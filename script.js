@@ -4,9 +4,18 @@ let currentFile = null;
 
 // Load Pyodide
 async function loadPyodideAndSetup() {
-    pyodide = await loadPyodide();
-    createFile('main.py', true);
-    openFile('main.py');
+    // Show the loading overlay
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    loadingOverlay.classList.add('visible');
+
+    try {
+        pyodide = await loadPyodide();
+        createFile('main.py', true);
+        openFile('main.py');
+    } finally {
+        // Hide the loading overlay
+        loadingOverlay.classList.remove('visible');
+    }
 }
 
 window.onload = loadPyodideAndSetup;
@@ -55,6 +64,7 @@ function deleteFile(fileName) {
         }
     }
 }
+
 
 // Open a file
 function openFile(fileName) {
