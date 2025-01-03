@@ -7,13 +7,13 @@ const LOCAL_STORAGE_KEY = "savedFiles";
 // Load Pyodide and sync files from localStorage
 async function loadPyodideAndSetup() {
     document.addEventListener("DOMContentLoaded", () => {
-    const fileName = document.getElementById("currentFileName").innerText.replace("File: ", "");
-    const savedCode = localStorage.getItem(fileName);
-    
-    if (savedCode) {
-        document.getElementById("editor").value = savedCode; // Populate the editor with saved code
-    }
-});
+        const fileName = document.getElementById("currentFileName").innerText.replace("File: ", "");
+        const savedCode = localStorage.getItem(fileName);
+
+        if (savedCode) {
+            document.getElementById("editor").value = savedCode; // Populate the editor with saved code
+        }
+    });
 
     // Show the loading overlay
     const loadingOverlay = document.getElementById('loadingOverlay');
@@ -21,8 +21,9 @@ async function loadPyodideAndSetup() {
 
     try {
         pyodide = await loadPyodide();
+        syncFilesWithStorage(); // Ensure files are loaded from localStorage
         if (!Object.keys(files).length) {
-            createFile('main.py', true);
+            createFile('main.py', true); // Create a default file if no files exist
         }
         openFile(Object.keys(files)[0]); // Open the first file
     } finally {
@@ -57,7 +58,7 @@ function createFile(fileName = null, isInitial = false) {
         return;
     }
     files[fileName] = isInitial ? 'print("Hello world")' : '';
-    saveFilesToStorage();
+    saveFilesToStorage();  // Save the files after creation
     createFileListItem(fileName);
 }
 
@@ -71,7 +72,7 @@ function createFileListItem(fileName) {
     fileButton.textContent = fileName;
     fileButton.className = 'file-name';
     fileButton.onclick = () => {
-        window.location.href = `code.html?file=${encodeURIComponent(fileName)}`;
+        openFile(fileName); // Open the clicked file
     };
 
     const deleteButton = document.createElement('button');
@@ -88,7 +89,7 @@ function createFileListItem(fileName) {
 function deleteFile(fileName) {
     if (confirm(`Delete "${fileName}"?`)) {
         delete files[fileName];
-        saveFilesToStorage();
+        saveFilesToStorage();  // Update localStorage after deletion
         updateFileList();
     }
 }
@@ -112,11 +113,9 @@ function saveAllFiles() {
     alert(`File "${fileName}" saved to local storage!`);
 }
 
-
-
 // Save all files to localStorage
 function saveFilesToStorage() {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(files));
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(files)); // Save the entire files object to localStorage
 }
 
 // Clear editor
