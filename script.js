@@ -65,10 +65,31 @@ document.getElementById('editor').addEventListener('input', () => {
 // Run Python code
 async function runCode() {
     const code = document.getElementById('editor').value;
+    console.log("Executing Python code:", code);
+
     try {
-        const result = await pyodide.runPythonAsync(code);
-        document.getElementById('output').textContent = result;
+        // Redirect Python's stdout to a custom buffer
+        await pyodide.runPythonAsync(`
+            import sys
+            from io import StringIO
+            sys.stdout = StringIO()  # Redirect stdout
+        `);
+
+        // Execute the user's code
+        await pyodide.runPythonAsync(code);
+
+        // Get the captured output from the custom buffer
+        const output = await pyodide.runPythonAsync(`
+            sys.stdout.getvalue()
+        `);
+
+        // Display the output
+        console.log("Execution output:", output);
+        document.getElementById('output').textContent = output;
+
     } catch (err) {
-        document.getElementById('output').textContent = `Error: ${err}`;
+        // Display any errors
+        console.error("Execution error:", err);
+        document.getElementById('output').textContent = `Error: ${err.message}`;
     }
 }
