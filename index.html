@@ -3,14 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compyle Python compiler</title>
+    <title>Compyle Python Compiler</title>
     <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/theme/material-darker.min.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.css">
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/mode/python/python.min.js"></script>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.22.0/full/pyodide.js"></script>
 </head>
 <body>
-
     <div class="icon-container">
-        <!-- Download Icon -->
         <img src="assets/download.png" alt="Download" class="icon-button" onclick="downloadCode()">
     </div>
 
@@ -22,30 +28,25 @@
         <img src="assets/logo.png" alt="Compiler Logo" class="logo">
     </div>
 
-    <!-- Loading Overlay -->
     <div id="loadingOverlay" class="loading-overlay">
         <div class="loading-icon"></div>
         <div class="loading-text">Initialising Compyler</div>
     </div>
 
     <div class="container">
-        <!-- File Panel -->
         <div class="file-panel">
             <h2>Files</h2>
             <button class="create-button" onclick="createFile()">+ Create File</button>
             <ul id="fileList"></ul>
         </div>
 
-        <!-- Main Content -->
         <div class="main-content">
-            <!-- Code Editor Panel -->
             <div class="editor-panel">
                 <h2 id="currentFileName">File: main.py</h2>
                 <textarea id="editor" placeholder="Your python code goes here…"></textarea>
                 <button onclick="runCode()">Run</button>
             </div>
 
-            <!-- Output Panel -->
             <div class="output-panel">
                 <h2>Output</h2>
                 <pre id="output">View the results of your code here</pre>
@@ -54,6 +55,5 @@
     </div>
 
 <script src="script.js"></script>
-
 </body>
 </html>
