@@ -4,10 +4,15 @@ let currentFile = null;
 
 // Load Pyodide
 async function loadPyodideAndSetup() {
-    pyodide = await loadPyodide();
-    console.log('Pyodide loaded');
-    createFile('main.py', true);
-    openFile('main.py');
+    try {
+        console.log("Loading Pyodide...");
+        pyodide = await loadPyodide();
+        console.log("Pyodide loaded successfully.");
+        createFile('main.py', true);
+        openFile('main.py');
+    } catch (err) {
+        console.error("Error loading Pyodide:", err);
+    }
 }
 
 window.onload = loadPyodideAndSetup;
