@@ -2,18 +2,9 @@
 let pyodide = null;
 let files = {}; // This will hold the code of each file
 let currentFile = null;
-const LOCAL_STORAGE_KEY = "savedFiles";
 
 // Load Pyodide and sync files from localStorage
 async function loadPyodideAndSetup() {
-    document.addEventListener("DOMContentLoaded", () => {
-        const fileName = document.getElementById("currentFileName").innerText.replace("File: ", "");
-        const savedCode = localStorage.getItem(fileName);
-
-        if (savedCode) {
-            document.getElementById("editor").value = savedCode; // Populate the editor with saved code
-        }
-    });
 
     // Show the loading overlay
     const loadingOverlay = document.getElementById('loadingOverlay');
@@ -33,13 +24,6 @@ async function loadPyodideAndSetup() {
 }
 
 window.onload = loadPyodideAndSetup;
-
-// Sync files with localStorage
-function syncFilesWithStorage() {
-    const savedFiles = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || {};
-    Object.assign(files, savedFiles); // Merge saved files with the current files object
-    updateFileList();
-}
 
 // Update the file list in the UI
 function updateFileList() {
@@ -100,26 +84,6 @@ function openFile(fileName) {
     currentFile = fileName;
     document.getElementById('currentFileName').textContent = `File: ${fileName}`;
     document.getElementById('editor').value = files[fileName];
-}
-
-// Save the current code to localStorage (specific file code)
-function saveCurrentFileCode() {
-    const code = document.getElementById("editor").value; // Get the code from the editor
-    const fileName = document.getElementById("currentFileName").innerText.replace("File: ", ""); // Get the current file name
-
-    // Save the code and file name to localStorage
-    localStorage.setItem(fileName, code);
-
-    // Also update the `files` object so it's in sync
-    files[fileName] = code;
-
-    alert(`File "${fileName}" saved to local storage!`);
-}
-
-// Save all files to localStorage
-function saveAllFiles() {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(files)); // Save the entire files object to localStorage
-    alert("Saved")
 }
 
 // Clear editor
@@ -189,31 +153,3 @@ function downloadCode() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 }
-
-// Upload file handling (via an input field)
-function handleFileUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-
-    reader.onload = function(e) {
-        const fileName = file.name;
-        const fileContent = e.target.result;
-
-        // Add the uploaded file to the `files` object
-        files[fileName] = fileContent;
-
-        // Save the new file to localStorage
-        saveFilesToStorage();
-
-        // Update the UI with the new file
-        createFileListItem(fileName);
-        openFile(fileName);  // Automatically open the uploaded file
-    };
-
-    reader.readAsText(file);
-}
-
-// File input event listener
-document.getElementById('fileInput').addEventListener('change', handleFileUpload);
