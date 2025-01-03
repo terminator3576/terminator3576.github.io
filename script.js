@@ -12,7 +12,6 @@ async function loadPyodideAndSetup() {
 
     try {
         pyodide = await loadPyodide();
-        syncFilesWithStorage(); // Ensure files are loaded from localStorage
         if (!Object.keys(files).length) {
             createFile('main.py', true); // Create a default file if no files exist
         }
