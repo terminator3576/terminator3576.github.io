@@ -218,3 +218,23 @@ button:hover {
         transform: rotate(360deg);
     }
 }
+
+.logo-container {
+    position: absolute;
+    top: 2px;
+    left: 10px;
+    z-index: 1000;
+}
+
+.logo {
+    width: 50px; /* Adjust size as needed */
+    height: auto;
+}
+
+.name {
+    position: absolute;
+    top: 2px;
+    left: 55px;
+    z-index: 1000;
+}
+
