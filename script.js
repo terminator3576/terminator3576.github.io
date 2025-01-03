@@ -2,7 +2,6 @@
 let pyodide = null;
 let files = {}; // This will hold the code of each file
 let currentFile = null;
-let timeout;
 
 // Load Pyodide and sync files from localStorage
 async function loadPyodideAndSetup() {
@@ -95,7 +94,6 @@ async function runCode() {
     const editor = document.getElementById('editor');
     const output = document.getElementById('output');
     const code = editor.value;
-    const timeLimit = 5000; // 5 seconds timeout for the Python code execution
 
     // Clear previous output
     output.textContent = "Running your code...";
@@ -104,24 +102,17 @@ async function runCode() {
     await loadPyodide();
 
     try {
-        // Set a timeout to stop the code if it takes too long
-        timeout = setTimeout(() => {
-            throw new Error("Code execution timed out due to infinite loop or long running process.");
-        }, timeLimit);
-
         // Run the Python code using Pyodide
         let result = await pyodide.runPythonAsync(code);
         
         // If successful, output the result
         output.textContent = result;
     } catch (error) {
-        // Catch and display any errors (including timeout error)
+        // Catch and display any errors
         output.textContent = `Error: ${error.message}`;
-    } finally {
-        // Clear the timeout if the code finishes successfully
-        clearTimeout(timeout);
     }
 }
+
 
 // Download the current file
 function downloadCode() {
