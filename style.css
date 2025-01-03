@@ -1,192 +1,236 @@
-// Global variables
-let pyodide = null;
-let files = {}; // This will hold the code of each file
-let currentFile = null;
-let editorInstance = null;
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #0F1524; /* Unified dark theme */
+    color: #f4f4f4; /* Light text for better contrast */
+}
 
-// Load Pyodide and initialize CodeMirror
-async function loadPyodideAndSetup() {
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    loadingOverlay.classList.add('visible');
+.container {
+    display: flex;
+    height: 100vh; /* Full viewport height */
+}
 
-    try {
-        pyodide = await loadPyodide();
+.file-panel {
+    width: 15%; /* Smaller width for file panel */
+    padding: 20px;
+    background-color: #1a1a1a; /* Dark background */
+    border-right: 2px solid white; /* White border to separate file panel */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
 
-        // Initialize CodeMirror
-        const editorElement = document.getElementById('editor');
-        editorInstance = CodeMirror.fromTextArea(editorElement, {
-            mode: 'python',
-            lineNumbers: true,
-            theme: 'material-darker', 
-        });
+.create-button {
+    background-color: #073564; /* Dark blue */
+    color: #f4f4f4;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: 15px;
+    transition: background-color 0.3s;
+}
 
-        if (!Object.keys(files).length) {
-            createFile('main.py', true);
-        }
-        openFile(Object.keys(files)[0]);
-    } finally {
-        loadingOverlay.classList.remove('visible');
+.create-button:hover {
+    background-color: #054a87; /* Slightly lighter blue on hover */
+}
+
+.file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    color: #f4f4f4;
+}
+
+.menu-button {
+    background: none;
+    border: none;
+    color: #f4f4f4;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.main-content {
+    display: flex;
+    flex-grow: 1;
+}
+
+.output-panel, .editor-panel {
+    width: 50%; /* Split output and editor evenly */
+    padding: 20px;
+    border-left: 2px solid white;
+}
+
+textarea {
+    position: absolute; /* Allow replacement without interfering with layout */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Push it behind the CodeMirror UI */
+    opacity: 0; /* Invisible but still present for CodeMirror */
+    pointer-events: none; /* Prevent interaction with the textarea */
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    background-color: #28a745;
+    color: #f4f4f4;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+#output {
+    flex-grow: 1;
+    background-color: #1a1a1a;
+    color: #f4f4f4;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #333;
+    overflow-y: auto;
+    font-family: 'Courier New', Courier, monospace;
+    white-space: pre-wrap;
+}
+
+.file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 5px;
+    background-color: #2a2a2a; /* Slight contrast for file items */
+    border-radius: 5px;
+    cursor: pointer; /* Makes it look clickable */
+    transition: background-color 0.3s;
+}
+
+.file-item:hover {
+    background-color: #3a3a3a; /* Highlight on hover */
+}
+
+.file-name {
+    background: none;
+    border: none;
+    color: #f4f4f4;
+    font-size: 16px;
+    text-align: left;
+    cursor: pointer;
+    padding: 5px 10px;
+    flex-grow: 1; /* Ensures it fills available space */
+    transition: color 0.3s;
+}
+
+.file-name:hover {
+    color: #00aaff; /* Highlight text on hover */
+}
+
+.menu-button {
+    background: none;
+    border: none;
+    color: #f4f4f4;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 5px;
+    transition: color 0.3s;
+}
+
+.menu-button:hover {
+    color: #ff5555; /* Red hover effect for delete button */
+}
+
+
+/* Style for the loading overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    visibility: hidden;
+}
+
+.loading-overlay.visible {
+    visibility: visible;
+}
+
+.loading-icon {
+    width: 50px;
+    height: 50px;
+    border: 6px solid #fff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loading-text {
+    margin-top: 20px;
+    color: white;
+    font-size: 18px;
+    font-family: Arial, sans-serif;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
     }
 }
 
-window.onload = loadPyodideAndSetup;
-
-// Update the file list in the UI
-function updateFileList() {
-    const fileList = document.getElementById('fileList');
-    fileList.innerHTML = '';
-    for (const fileName in files) {
-        createFileListItem(fileName);
-    }
+.logo-container {
+    position: absolute;
+    top: 2px;
+    left: 10px;
+    z-index: 1000;
 }
 
-// Create a new file
-function createFile(fileName = null, isInitial = false) {
-    fileName = fileName || prompt('Enter file name:', `file${Object.keys(files).length + 1}.py`);
-    if (!fileName || files[fileName]) {
-        console.warn(`File creation skipped: ${fileName ? `"${fileName}" already exists.` : "Invalid file name."}`);
-        return;
-    }
-    files[fileName] = isInitial ? 'print("Hello world")' : ''; // Default code or empty
-    createFileListItem(fileName);
+.logo {
+    width: 50px; /* Adjust size as needed */
+    height: auto;
 }
 
-// Create a file list item in the UI
-function createFileListItem(fileName) {
-    const fileList = document.getElementById('fileList');
-    const fileItem = document.createElement('li');
-    fileItem.className = 'file-item';
-
-    const fileButton = document.createElement('button');
-    fileButton.textContent = fileName;
-    fileButton.className = 'file-name';
-    fileButton.onclick = () => {
-        openFile(fileName); // Open the clicked file
-    };
-
-    const deleteButton = document.createElement('button');
-    deleteButton.className = 'menu-button';
-    deleteButton.textContent = '...';
-    deleteButton.onclick = () => deleteFile(fileName);
-
-    fileItem.appendChild(fileButton);
-    fileItem.appendChild(deleteButton);
-    fileList.appendChild(fileItem);
+.name {
+    position: absolute;
+    top: 2px;
+    left: 55px;
+    z-index: 1000;
 }
 
-function saveCurrentFile() {
-    if (!currentFile) return;
-    files[currentFile] = editorInstance.getValue();
+        /* Position the icons in the top-right corner */
+.icon-container {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 10px;
+    z-index: 1000;
 }
 
-// Delete a file
-function deleteFile(fileName) {
-    if (confirm(`Delete "${fileName}"?`)) {
-        delete files[fileName];
-        updateFileList();
-    }
+.icon-button {
+    width: 40px; /* Adjust size as needed */
+    height: auto;
+    cursor: pointer;
 }
 
-// Open a file
-function openFile(fileName) {
-    if (!files[fileName]) return;
-    currentFile = fileName;
-    document.getElementById('currentFileName').textContent = `File: ${fileName}`;
-    editorInstance.setValue(files[fileName]);
+.icon-button:hover {
+    opacity: 0.8; /* Optional hover effect */
 }
 
-// Clear editor
-function clearEditor() {
-    document.getElementById('currentFileName').textContent = 'No file selected';
-    document.getElementById('editor').value = '';
-    currentFile = null;
-}
-
-async function runCode() {
-    saveCurrentFile(); // Save current content
-    const code = files[currentFile];
-
-    try {
-        await pyodide.runPythonAsync(`
-            import sys
-            from io import StringIO
-            sys.stdout = StringIO()
-        `);
-        await pyodide.runPythonAsync(code);
-        const output = await pyodide.runPythonAsync(`sys.stdout.getvalue()`);
-        document.getElementById('output').textContent = output;
-    } catch (err) {
-        console.error("Execution error:", err);
-        document.getElementById('output').textContent = `Error: ${err.message}`;
-    }
-}
-
-// Download the current file
-function downloadCode() {
-    if (!currentFile) {
-        alert("No file selected to download.");
-        return;
-    }
-
-    const fileName = currentFile; // Get the current file's name
-    const code = files[currentFile]; // Get the code content of the current file
-
-    if (!code) {
-        alert("The file is empty. Nothing to download.");
-        return;
-    }
-
-    // Create a blob from the code
-    const blob = new Blob([code], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-
-    // Create a temporary anchor element to trigger the download
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileName; // File name with the ".py" extension
-    document.body.appendChild(a);
-    a.click();
-
-    // Clean up the temporary anchor element
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
-// Add a new function to format the code using autopep8
-async function formatCode() {
-    if (!currentFile) return;
-
-    const code = editorInstance.getValue();
-
-    try {
-        // Ensure the autopep8 package is loaded before formatting
-        await pyodide.loadPackage('micropip');
-        await pyodide.runPythonAsync(`
-            import micropip
-            await micropip.install("autopep8")
-        `);
-
-        // Use Pyodide to run the autopep8 formatting
-        const formattedCode = await pyodide.runPythonAsync(`
-            import autopep8
-            formatted_code = autopep8.fix_code(${JSON.stringify(code)})
-            formatted_code
-        `);
-
-        // Update the editor with the formatted code
-        editorInstance.setValue(formattedCode);
-    } catch (err) {
-        console.error("Formatting error:", err);
-        document.getElementById('output').textContent = `Error formatting code: ${err.message}`;
-    }
-}
-
-// Add a "Format Code" button to the UI
-document.addEventListener('DOMContentLoaded', function() {
-    const formatButton = document.createElement('button');
-    formatButton.textContent = 'Format Code';
-    formatButton.onclick = formatCode;
-
-    const editorPanel = document.querySelector('.editor-panel');
-    editorPanel.appendChild(formatButton);
-});
