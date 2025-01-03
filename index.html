@@ -5,9 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Python Code Editor</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.22.1/full/pyodide.js"></script>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.22.0/full/pyodide.js"></script>
 </head>
 <body>
+
+    <div class="download-container">
+        <button id="downloadButton" onclick="downloadCode()">Download</button>
+    </div>
+
     <div class="container">
         <!-- File Panel -->
         <div class="file-panel">
@@ -32,7 +37,5 @@
             </div>
         </div>
     </div>
-
-    <script src="script.js"></script>
 </body>
 </html>
