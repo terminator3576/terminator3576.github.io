@@ -105,7 +105,7 @@ function openFile(fileName) {
 // Save all files to localStorage
 function saveAllFiles() {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(files)); // Save the entire files object to localStorage
-    alert(`File "${fileName}" saved to local storage!`);
+    alert(`Code succesfully saved!`);
 }
 
 // Clear editor
