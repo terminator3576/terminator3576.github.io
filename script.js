@@ -21,14 +21,35 @@ window.onload = loadPyodideAndSetup;
 function createFile(fileName = null, isInitial = false) {
     const fileList = document.getElementById('fileList');
     fileName = fileName || prompt('Enter file name:', `file${Object.keys(files).length + 1}.py`);
-    if (!fileName || files[fileName]) return;
+    if (!fileName || files[fileName]) {
+        console.warn(`File creation skipped: ${fileName ? `"${fileName}" already exists.` : "Invalid file name."}`);
+        return;
+    }
     files[fileName] = isInitial ? '# Main Python file' : '';
+
     const fileItem = document.createElement('li');
     fileItem.className = 'file-item';
-    fileItem.innerHTML = `<span onclick="openFile('${fileName}')">${fileName}</span>
-                          <button class="menu-button" onclick="deleteFile('${fileName}')">...</button>`;
+
+    // Create clickable span or button for the file name
+    const fileButton = document.createElement('button');
+    fileButton.textContent = fileName;
+    fileButton.className = 'file-name';
+    fileButton.onclick = () => openFile(fileName); // Attach click event
+
+    const deleteButton = document.createElement('button');
+    deleteButton.className = 'menu-button';
+    deleteButton.textContent = '...';
+    deleteButton.onclick = () => deleteFile(fileName); // Attach delete event
+
+    // Add file name and delete button to the file item
+    fileItem.appendChild(fileButton);
+    fileItem.appendChild(deleteButton);
+
+    // Add file item to the file list
     fileList.appendChild(fileItem);
+    console.log(`File created: ${fileName}`);
 }
+
 
 // Delete a file
 function deleteFile(fileName) {
@@ -92,4 +113,34 @@ async function runCode() {
         console.error("Execution error:", err);
         document.getElementById('output').textContent = `Error: ${err.message}`;
     }
+}
+
+function downloadCode() {
+if (!currentFile) {
+    alert("No file selected to download.");
+    return;
+}
+
+const fileName = currentFile; // Get the current file's name
+const code = files[currentFile]; // Get the code content of the current file
+
+if (!code) {
+    alert("The file is empty. Nothing to download.");
+    return;
+}
+
+// Create a blob from the code
+const blob = new Blob([code], { type: "text/plain" });
+const url = URL.createObjectURL(blob);
+
+// Create a temporary anchor element to trigger the download
+const a = document.createElement("a");
+a.href = url;
+a.download = fileName; // File name with the ".py" extension
+document.body.appendChild(a);
+a.click();
+
+// Clean up the temporary anchor element
+document.body.removeChild(a);
+URL.revokeObjectURL(url);
 }
