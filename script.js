@@ -165,60 +165,79 @@ function clearEditor() {
     currentFile = null;
 }
 
-async function getUserIP() {
-    try {
-        const response = await fetch('https://api.ipify.org?format=json');
-        const data = await response.json();
-        return data.ip;
-    } catch (error) {
-        console.error('Error fetching IP:', error);
-        return null; // Return null in case of error
-    }
-}
-
 async function runCode() {
-    saveCurrentFile();  // Save the current file content
-    const code = files[currentFile];  // Get the code of the current file
+  // Save current file content before running it
+  saveCurrentFile();
+  
+  const code = files[currentFile];
 
-    // Check if the code is malicious before running it
-    if (isMaliciousCode(code)) {
-        logMaliciousActivity(); // Log the malicious activity
-        warnUser(); 
-        document.getElementById('output').textContent = "Error: Malicious code detected. Your IP has been banned.";
-
-        // Get the user's IP address automatically
-        const userIP = await getUserIP();
-        
-        if (userIP) {
-            try {
-                const { banIP } = await import('./ban.js');
-                await banIP(userIP);
-            } catch (error) {
-                console.error("Failed to import ban.js or ban IP:", error);
-            }
-
-        return;
-    }
-
+  // Check if the code is malicious before running it
+  if (isMaliciousCode(code)) {
+    logMaliciousActivity(); // Log the malicious activity
+    warnUser(); // Notify the user
+    
+    document.getElementById('output').textContent = "Error: Malicious code detected. Your IP has been banned.";
+    
+    // Dynamically import ban.js and ban the user's IP
     try {
-        // Execute the code in Pyodide
-        await pyodide.runPythonAsync(`
-            import sys
-            from io import StringIO
-            sys.stdout = StringIO()
-        `);
-        await pyodide.runPythonAsync(code);
-        const output = await pyodide.runPythonAsync(`sys.stdout.getvalue()`);
-        document.getElementById('output').textContent = output;
-    } catch (err) {
-        console.error("Execution error:", err);
-        document.getElementById('output').textContent = `Error: ${err.message}`;
-    } finally {
-        await pyodide.runPythonAsync(`
-            sys.stdout = sys.__stdout__
-        `);
+      // Import the ban.js script and extract the `banIP` function
+      const { banIP } = await import('./ban.js');
+      
+      // Get the user's IP address dynamically
+      const userIP = await getUserIP();
+      
+      if (userIP) {
+        // Call the banIP function to ban the user's IP
+        await banIP(userIP);
+        console.log(`IP ${userIP} has been banned due to malicious activity.`);
+      } else {
+        console.error("Failed to fetch user's IP.");
+      }
+    } catch (error) {
+      console.error("Failed to import ban.js or ban IP:", error);
     }
+    
+    return; // Stop further execution if code is malicious
+  }
+
+  try {
+    // Run the Python code using Pyodide
+    await pyodide.runPythonAsync(`
+      import sys
+      from io import StringIO
+      sys.stdout = StringIO()
+    `);
+    
+    // Execute the user code in Python
+    await pyodide.runPythonAsync(code);
+    
+    // Capture the output
+    const output = await pyodide.runPythonAsync(`sys.stdout.getvalue()`);
+    document.getElementById('output').textContent = output;
+  } catch (err) {
+    // Handle any errors during code execution
+    console.error("Execution error:", err);
+    document.getElementById('output').textContent = `Error: ${err.message}`;
+  } finally {
+    // Reset the stdout back to default after execution
+    await pyodide.runPythonAsync(`
+      sys.stdout = sys.__stdout__
+    `);
+  }
 }
+
+// Helper function to fetch user's IP address dynamically
+async function getUserIP() {
+  try {
+    const response = await fetch('https://api.ipify.org?format=json');
+    const data = await response.json();
+    return data.ip;
+  } catch (error) {
+    console.error("Failed to get IP address:", error);
+    return null; // Fallback to null if we can't retrieve the IP
+  }
+}
+
 
 
 
