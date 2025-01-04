@@ -16,16 +16,3 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
-
-// Function to save a banned IP
-async function banIP(ip) {
-    try {
-        // Ensure that the IP address is safe to store by replacing '.' with '_'
-        const safeIP = ip.replace(/\./g, '_');
-        
-        await set(ref(database, "bannedIPs/" + safeIP), true);
-        console.log(`IP ${ip} has been banned.`);
-    } catch (error) {
-        console.error("Error banning IP:", error);
-    }
-}
