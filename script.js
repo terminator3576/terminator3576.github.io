@@ -3,6 +3,41 @@ let pyodide = null;
 let files = {}; // This will hold the code of each file
 let currentFile = null;
 let editorInstance = null;
+let bannedIPs = new Set(); 
+let userIP = "192.168.1.1";
+
+
+function banIP(ip) {
+    bannedIPs.add(ip);
+    console.warn(`IP ${ip} has been banned for submitting malicious code.`);
+}
+
+function logMaliciousActivity(ip) {
+    console.warn(`Malicious activity detected from IP: ${ip}`);
+}
+
+function isMaliciousCode(code) {
+    // Basic malicious code patterns to look for (e.g., system calls, dangerous imports)
+    const dangerousPatterns = [
+        /import\s+(os|subprocess|sys|platform)/i, // Detecting dangerous imports
+        /os\./i, // Checking for system-level commands like os.system()
+        /subprocess\./i, // Checking for subprocess usage
+        /eval\(/i, // Detecting eval function
+        /exec\(/i, // Detecting exec function
+        /open\(/i, // Detecting file open functions
+        /import\s+socket/i, // Detecting socket imports for remote communication
+        /import\s+requests/i // Detecting requests import for HTTP access
+    ];
+
+    // Check the code for any dangerous patterns
+    for (let pattern of dangerousPatterns) {
+        if (pattern.test(code)) {
+            return true; // Code is malicious
+        }
+    }
+    return false; // No malicious code detected
+}
+
 
 // Load Pyodide and initialize CodeMirror
 async function loadPyodideAndSetup() {
@@ -21,7 +56,7 @@ async function loadPyodideAndSetup() {
             matchBrackets: true,
             autoCloseBrackets: {
                 override: true,
-                pairs: "()[]{}''\"\"", // Exclude double quotes here
+                pairs: "()[]{}''\"\"",
                 closeBefore: ")]}:;",
                 triples: "",
                 explode: "()[]{}",
@@ -32,10 +67,8 @@ async function loadPyodideAndSetup() {
                     const token = cm.getTokenAt(cursor);
 
                     if (token.type === "string") {
-                        // Insert a single quote without closing if inside a string
                         cm.replaceSelection("'", "end");
                     } else {
-                        // Insert a pair of single quotes and place cursor in the middle
                         cm.replaceSelection("''");
                         cm.setCursor(cursor.line, cursor.ch + 1);
                     }
@@ -45,19 +78,14 @@ async function loadPyodideAndSetup() {
                     const token = cm.getTokenAt(cursor);
 
                     if (token.type === "string") {
-                        // Insert a double quote without closing if inside a string
                         cm.replaceSelection('"', "end");
                     } else {
-                        // Auto-close double quotes outside strings
                         cm.replaceSelection('""');
                         cm.setCursor(cursor.line, cursor.ch + 1);
                     }
                 },
             },
         });
-
-
-
 
         if (!Object.keys(files).length) {
             createFile('main.py', true);
@@ -143,6 +171,14 @@ function clearEditor() {
 async function runCode() {
     saveCurrentFile();
     const code = files[currentFile];
+
+    // Check if the code is malicious before running it
+    if (isMaliciousCode(code)) {
+        logMaliciousActivity(userIP); // Log the malicious activity
+        banIP(userIP); // Ban the IP
+        document.getElementById('output').textContent = "Error: Malicious code detected. Your IP has been banned.";
+        return;
+    }
 
     try {
         await pyodide.runPythonAsync(`
