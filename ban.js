@@ -4,7 +4,7 @@ import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/fireb
 
 // Your Firebase configuration
 const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  apiKey: "AIzaSyBXG8v7UzzGv_UT7ZaO_RMKbvh17Kmy7lU",
   authDomain: "compyle-f584b.firebaseapp.com",
   databaseURL: "https://compyle-f584b-default-rtdb.firebaseio.com",
   projectId: "compyle-f584b",
