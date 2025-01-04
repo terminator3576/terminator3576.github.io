@@ -21,7 +21,8 @@ const database = getDatabase(app);
 // Function to save a banned IP
 async function banIP(ip) {
   try {
-    await set(ref(database, "bannedIPs/" + ip), true);
+    const bannedIPsRef = ref(database, `bannedIPs/${ip}`);
+    await set(bannedIPsRef, { banned: true, timestamp: new Date().toISOString() });
     console.log(`IP ${ip} has been banned.`);
   } catch (error) {
     console.error("Error banning IP:", error);
@@ -33,7 +34,11 @@ async function isIPBanned(ip) {
   try {
     const dbRef = ref(database);
     const snapshot = await get(child(dbRef, `bannedIPs/${ip}`));
-    return snapshot.exists();
+    if (snapshot.exists() && snapshot.val().banned) {
+      console.log("IP is banned:", snapshot.val());
+      return true;
+    }
+    return false;
   } catch (error) {
     console.error("Error checking IP:", error);
     return false;
@@ -42,7 +47,7 @@ async function isIPBanned(ip) {
 
 // Example usage
 async function checkAndBanIP() {
-  const userIP = "123.45.67.89"; // Replace with dynamic IP fetching
+  const userIP = await getUserIP(); // Dynamically fetch user's IP
 
   // Check if the IP is banned
   const banned = await isIPBanned(userIP);
@@ -52,7 +57,20 @@ async function checkAndBanIP() {
     document.getElementById("output").textContent = "Your IP is banned.";
   } else {
     console.log("IP is not banned.");
+    // Ban the IP as an example (remove if unnecessary)
     await banIP(userIP);
+  }
+}
+
+// Fetch user's IP using an external API
+async function getUserIP() {
+  try {
+    const response = await fetch("https://api.ipify.org?format=json");
+    const data = await response.json();
+    return data.ip;
+  } catch (error) {
+    console.error("Error fetching IP address:", error);
+    return null;
   }
 }
 
