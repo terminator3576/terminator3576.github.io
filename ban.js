@@ -18,12 +18,18 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
+// Utility to sanitize IP address for Firebase paths
+function sanitizeIP(ip) {
+  return ip.replaceAll('.', '_');
+}
+
 // Function to save a banned IP
 async function banIP(ip) {
   try {
-    const bannedIPsRef = ref(database, `bannedIPs/${ip}`);
+    const sanitizedIP = sanitizeIP(ip);
+    const bannedIPsRef = ref(database, `bannedIPs/${sanitizedIP}`);
     await set(bannedIPsRef, { banned: true, timestamp: new Date().toISOString() });
-    console.log(`IP ${ip} has been banned.`);
+    console.log(`IP ${ip} (sanitized: ${sanitizedIP}) has been banned.`);
   } catch (error) {
     console.error("Error banning IP:", error);
   }
@@ -32,8 +38,9 @@ async function banIP(ip) {
 // Function to check if an IP is banned
 async function isIPBanned(ip) {
   try {
+    const sanitizedIP = sanitizeIP(ip);
     const dbRef = ref(database);
-    const snapshot = await get(child(dbRef, `bannedIPs/${ip}`));
+    const snapshot = await get(child(dbRef, `bannedIPs/${sanitizedIP}`));
     if (snapshot.exists() && snapshot.val().banned) {
       console.log("IP is banned:", snapshot.val());
       return true;
