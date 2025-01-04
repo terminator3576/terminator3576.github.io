@@ -19,8 +19,8 @@
     <script src="https://cdn.jsdelivr.net/pyodide/v0.22.0/full/pyodide.js"></script>
 
     <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
 </head>
 <body>
     <div class="icon-container">
@@ -62,7 +62,7 @@
     </div>
 
     <!-- Main JavaScript Files -->
-    <script src="ban.js"></script> <!-- Includes IP banning logic -->
-    <script src="script.js"></script> <!-- Includes Python compiler logic -->
+    <script type="module" src="ban.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
