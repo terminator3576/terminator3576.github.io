@@ -4,6 +4,24 @@ let files = {}; // This will hold the code of each file
 let currentFile = null;
 let editorInstance = null;
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBXG8v7UzzGv_UT7ZaO_RMKbvh17Kmy7lU",
+  authDomain: "compyle-f584b.firebaseapp.com",
+  databaseURL: "https://compyle-f584b-default-rtdb.firebaseio.com",
+  projectId: "compyle-f584b",
+  storageBucket: "compyle-f584b.firebasestorage.app",
+  messagingSenderId: "530949114306",
+  appId: "1:530949114306:web:c475476274050a5d1f6e5b",
+  measurementId: "G-KWSR49792B"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+
 
 function warnUser() {
     console.warn(`You have been banned for submitting malicious code.`);
@@ -165,8 +183,6 @@ function clearEditor() {
     currentFile = null;
 }
 
-import { set, ref, child, get } from "firebase/database"; // Import Firebase functions
-
 // Function to ban an IP address
 export async function banIP(ip) {
   try {
@@ -185,7 +201,7 @@ export async function isIPBanned(ip) {
     return snapshot.exists();
   } catch (error) {
     console.error(`Error checking if IP (${ip}) is banned:`, error);
-    return false; // Default to not banned on error
+    return false;
   }
 }
 
@@ -200,21 +216,21 @@ async function getUserIP() {
     return data.ip;
   } catch (error) {
     console.error("Failed to fetch user's IP address:", error);
-    return null; // Return null if unable to fetch IP
+    return null;
   }
 }
 
 // Function to run and manage user-submitted code
 async function runCode() {
   try {
-    // Save current file content before execution
+    // Save current file content before execution (assuming `saveCurrentFile()` is defined elsewhere)
     saveCurrentFile();
-    const code = files[currentFile];
+    const code = files[currentFile];  // Assuming `files[currentFile]` holds the code to execute
 
     // Check for malicious code
     if (isMaliciousCode(code)) {
-      logMaliciousActivity(); // Log the malicious activity
-      warnUser(); // Notify the user
+      logMaliciousActivity();  // Log the malicious activity
+      warnUser();  // Notify the user
 
       document.getElementById('output').textContent =
         "Error: Malicious code detected. Your IP has been banned.";
@@ -232,10 +248,10 @@ async function runCode() {
         console.error("Failed to ban user's IP:", banError);
       }
 
-      return; // Stop further execution if code is malicious
+      return;  // Stop further execution if code is malicious
     }
 
-    // Run the user-submitted code using Pyodide
+    // Run the user-submitted code using Pyodide (assuming pyodide is loaded elsewhere)
     await executePythonCode(code);
   } catch (error) {
     console.error("Error in runCode:", error);
@@ -247,29 +263,25 @@ async function runCode() {
 // Function to execute Python code safely using Pyodide
 async function executePythonCode(code) {
   try {
-    // Initialize stdout redirection in Pyodide
     await pyodide.runPythonAsync(`
       import sys
       from io import StringIO
       sys.stdout = StringIO()
     `);
 
-    // Execute the Python code
     await pyodide.runPythonAsync(code);
 
-    // Capture and display the output
     const output = await pyodide.runPythonAsync(`sys.stdout.getvalue()`);
     document.getElementById('output').textContent = output;
   } catch (executionError) {
-    // Handle Python code execution errors
     console.error("Python execution error:", executionError);
     document.getElementById('output').textContent =
       `Error during execution: ${executionError.message}`;
   } finally {
-    // Reset stdout back to default
     await pyodide.runPythonAsync(`sys.stdout = sys.__stdout__`);
   }
 }
+
 
 
 
