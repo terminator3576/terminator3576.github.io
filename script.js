@@ -4,29 +4,6 @@ let files = {}; // This will hold the code of each file
 let currentFile = null;
 let editorInstance = null;
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBXG8v7UzzGv_UT7ZaO_RMKbvh17Kmy7lU",
-  authDomain: "compyle-f584b.firebaseapp.com",
-  databaseURL: "https://compyle-f584b-default-rtdb.firebaseio.com",
-  projectId: "compyle-f584b",
-  storageBucket: "compyle-f584b.firebasestorage.app",
-  messagingSenderId: "530949114306",
-  appId: "1:530949114306:web:c475476274050a5d1f6e5b",
-  measurementId: "G-KWSR49792B"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
-
-
-function warnUser() {
-    console.warn(`You have been banned for submitting malicious code.`);
-}
-
 function logMaliciousActivity() {
     console.warn(`Malicious activity detected`);
 }
@@ -183,43 +160,6 @@ function clearEditor() {
     currentFile = null;
 }
 
-// Function to ban an IP address
-export async function banIP(ip) {
-  try {
-    await set(ref(database, `bannedIPs/${ip}`), true);
-    console.log(`IP ${ip} has been successfully banned.`);
-  } catch (error) {
-    console.error(`Error banning IP (${ip}):`, error);
-  }
-}
-
-// Function to check if an IP is already banned
-export async function isIPBanned(ip) {
-  try {
-    const dbRef = ref(database);
-    const snapshot = await get(child(dbRef, `bannedIPs/${ip}`));
-    return snapshot.exists();
-  } catch (error) {
-    console.error(`Error checking if IP (${ip}) is banned:`, error);
-    return false;
-  }
-}
-
-// Helper function to fetch user's IP address dynamically
-async function getUserIP() {
-  try {
-    const response = await fetch('https://api.ipify.org?format=json');
-    if (!response.ok) {
-      throw new Error(`HTTP error: ${response.status}`);
-    }
-    const data = await response.json();
-    return data.ip;
-  } catch (error) {
-    console.error("Failed to fetch user's IP address:", error);
-    return null;
-  }
-}
-
 // Function to run and manage user-submitted code
 async function runCode() {
   try {
@@ -230,28 +170,10 @@ async function runCode() {
     // Check for malicious code
     if (isMaliciousCode(code)) {
       logMaliciousActivity();  // Log the malicious activity
-      warnUser();  // Notify the user
 
       document.getElementById('output').textContent =
-        "Error: Malicious code detected. Your IP has been banned.";
-
-      // Attempt to ban the user's IP
-      try {
-        const userIP = await getUserIP();
-        if (userIP) {
-          await banIP(userIP);
-          console.log(`IP ${userIP} has been banned due to malicious activity.`);
-        } else {
-          console.warn("Could not retrieve user's IP for banning.");
-        }
-      } catch (banError) {
-        console.error("Failed to ban user's IP:", banError);
-      }
-
-      return;  // Stop further execution if code is malicious
-    }
-
-    // Run the user-submitted code using Pyodide (assuming pyodide is loaded elsewhere)
+        "Error: Malicious code detected";
+      
     await executePythonCode(code);
   } catch (error) {
     console.error("Error in runCode:", error);
