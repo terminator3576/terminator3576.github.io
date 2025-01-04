@@ -1,51 +1,62 @@
-let userIP = null;
+// Import and configure Firebase (for ES6+ projects)
+import { initializeApp } from "firebase/app";
+import { getDatabase, ref, set, get, child } from "firebase/database";
 
-// Fetch the user's IP address from ipify API
-fetch('https://api.ipify.org?format=json')
-    .then(response => response.json())
-    .then(data => {
-        // Store the IP address in the variable
-        userIP = data.ip;
+// Your Firebase configuration (replace with your own)
+const firebaseConfig = {
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: "compyle-f584b.firebaseapp.com",
+  databaseURL: "https://compyle-f584b-default-rtdb.firebaseio.com",
+  projectId: "compyle-f584b",
+  storageBucket: "compyle-f584b.firebasestorage.app",
+  messagingSenderId: "530949114306",
+  appId: "1:530949114306:web:c475476274050a5d1f6e5b",
+  measurementId: "G-KWSR49792B"
+};
 
-        // Now you can send the IP address to other JavaScript functions for processing
-        console.log('User IP address:', userIP);
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
 
-        // Example: Call a function to handle the IP
-        processUserIP(userIP);
-    })
-    .catch(error => {
-        console.error('Error fetching IP address:', error);
-    });
-
-// Function to process the user's IP address (example)
-function processUserIP(ip) {
-    // Here you can send the IP to your server or take other actions
-    // Example: Send the IP to a server using an API request
-    console.log('Processing IP address:', ip);
-
-    // Send the IP address to your backend to check if it is banned
-    fetch('https://your-backend-server.com/check-ip', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ip: ip }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Check if the IP is banned
-        if (data.isBanned) {
-            // Disable the "Run" button if the IP is banned
-            document.getElementById('runButton').disabled = true;
-
-            // Display a message to the user
-            document.getElementById('output').textContent = 'Your IP is banned. You cannot run code.';
-        } else {
-            console.log('IP is not banned');
-        }
-    })
-    .catch(error => {
-        console.error('Error checking IP:', error);
-        // You can handle errors by assuming the user is not banned
-    });
+// Function to save a banned IP
+async function banIP(ip) {
+    try {
+        await set(ref(database, 'bannedIPs/' + ip), true);
+        console.log(`IP ${ip} has been banned.`);
+    } catch (error) {
+        console.error('Error banning IP:', error);
+    }
 }
+
+// Function to check if an IP is banned
+async function isIPBanned(ip) {
+    try {
+        const dbRef = ref(database);
+        const snapshot = await get(child(dbRef, `bannedIPs/${ip}`));
+        return snapshot.exists();
+    } catch (error) {
+        console.error('Error checking IP:', error);
+        return false;
+    }
+}
+
+// Example usage
+async function checkAndBanIP() {
+    const userIP = "123.45.67.89"; // Replace with dynamic IP fetching
+
+    // Check if the IP is banned
+    const banned = await isIPBanned(userIP);
+    if (banned) {
+        alert("Your IP is banned.");
+        // Disable functionality or redirect
+        document.getElementById('runButton').disabled = true;
+        document.getElementById('output').textContent = 'Your IP is banned.';
+    } else {
+        console.log("IP is not banned.");
+        // Optionally ban the IP
+        await banIP(userIP);
+    }
+}
+
+// Call the function on page load
+window.addEventListener('DOMContentLoaded', checkAndBanIP);
