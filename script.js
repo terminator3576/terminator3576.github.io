@@ -165,16 +165,25 @@ function clearEditor() {
     currentFile = null;
 }
 
-async function banIP(ip) {
-    try {
-        // Ensure that the IP address is safe to store by replacing '.' with '_'
-        const safeIP = ip.replace(/\./g, '_');
-        
-        await set(ref(database, "bannedIPs/" + safeIP), true);
-        console.log(`IP ${ip} has been banned.`);
-    } catch (error) {
-        console.error("Error banning IP:", error);
-    }
+export async function banIP(ip) {
+  try {
+    await set(ref(database, `bannedIPs/${ip}`), true);
+    console.log(`IP ${ip} has been successfully banned.`);
+  } catch (error) {
+    console.error("Error banning IP:", error);
+  }
+}
+
+// Function to check if an IP is already banned
+export async function isIPBanned(ip) {
+  try {
+    const dbRef = ref(database);
+    const snapshot = await get(child(dbRef, `bannedIPs/${ip}`));
+    return snapshot.exists();
+  } catch (error) {
+    console.error("Error checking if IP is banned:", error);
+    return false;
+  }
 }
 
 async function runCode() {
