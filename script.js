@@ -190,11 +190,14 @@ async function runCode() {
         const userIP = await getUserIP();
         
         if (userIP) {
-            // Send a request to ban.js to ban the user's IP
             try {
-                await banIP(userIP); // Make sure the banIP function is defined in ban.js
+                // Dynamically import the ban.js module
+                const { banIP } = await import('./ban.js');  // Adjust path as necessary
+
+                // Call the banIP function to ban the user
+                await banIP(userIP);
             } catch (error) {
-                console.error("Failed to ban IP:", error);
+                console.error("Failed to import ban.js or ban IP:", error);
             }
         } else {
             console.error("Unable to get user's IP to ban.");
@@ -222,6 +225,7 @@ async function runCode() {
         `);
     }
 }
+
 
 
 // Download the current file
