@@ -6,26 +6,29 @@
     <title>Compyle Python Compiler</title>
     <link rel="stylesheet" href="style.css">
 
+    <!-- CodeMirror Themes and Styles -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/theme/material-darker.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.css">
 
+    <!-- CodeMirror Core -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/mode/python/python.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.22.0/full/pyodide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/edit/closebrackets.min.js"></script>
+
+    <!-- Pyodide (Python in Browser) -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.22.0/full/pyodide.js"></script>
+
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
 </head>
 <body>
-
-
-
     <div class="icon-container">
         <img src="assets/download.png" alt="Download" class="icon-button" onclick="downloadCode()">
     </div>
 
     <div class="name">
-        <p id='name'>Compyle</p>
+        <p id="name">Compyle</p>
     </div>
 
     <div class="logo-container">
@@ -48,7 +51,7 @@
             <div class="editor-panel">
                 <h2 id="currentFileName">File: main.py</h2>
                 <textarea id="editor" placeholder="Your python code goes here…"></textarea>
-                <button onclick="runCode()">Run</button>
+                <button id="runButton" onclick="runCode()">Run</button>
             </div>
 
             <div class="output-panel">
@@ -58,7 +61,8 @@
         </div>
     </div>
 
-<script src="script.js"></script>
-<script src="ban.js"></script>
+    <!-- Main JavaScript Files -->
+    <script src="ban.js"></script> <!-- Includes IP banning logic -->
+    <script src="script.js"></script> <!-- Includes Python compiler logic -->
 </body>
 </html>
