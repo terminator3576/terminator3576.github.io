@@ -177,8 +177,8 @@ async function getUserIP() {
 }
 
 async function runCode() {
-    saveCurrentFile();
-    const code = files[currentFile];
+    saveCurrentFile();  // Save the current file content
+    const code = files[currentFile];  // Get the code of the current file
 
     // Check if the code is malicious before running it
     if (isMaliciousCode(code)) {
@@ -204,6 +204,7 @@ async function runCode() {
     }
 
     try {
+        // Execute the code in Pyodide
         await pyodide.runPythonAsync(`
             import sys
             from io import StringIO
