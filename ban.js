@@ -40,9 +40,28 @@ async function isIPBanned(ip) {
     }
 }
 
+// Function to get the user's IP address
+async function getUserIP() {
+    try {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        return data.ip;
+    } catch (error) {
+        console.error('Error fetching user IP:', error);
+        return null;
+    }
+}
+
 // Example usage
 async function checkAndBanIP() {
-    const userIP = "123.45.67.89"; // Replace with dynamic IP fetching
+    const userIP = await getUserIP();
+
+    if (!userIP) {
+        console.error("Failed to fetch user IP.");
+        return;
+    }
+
+    console.log(`User IP: ${userIP}`);
 
     // Check if the IP is banned
     const banned = await isIPBanned(userIP);
