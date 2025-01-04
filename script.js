@@ -4,6 +4,33 @@ let files = {}; // This will hold the code of each file
 let currentFile = null;
 let editorInstance = null;
 
+// Malicious code checking functions
+function logMaliciousActivity() {
+    console.warn(`Malicious activity detected`);
+}
+
+function isMaliciousCode(code) {
+    // Basic malicious code patterns to look for (e.g., system calls, dangerous imports)
+    const dangerousPatterns = [
+        /import\s+(os|subprocess|sys|platform)/i, // Detecting dangerous imports
+        /os\./i, // Checking for system-level commands like os.system()
+        /subprocess\./i, // Checking for subprocess usage
+        /eval\(/i, // Detecting eval function
+        /exec\(/i, // Detecting exec function
+        /open\(/i, // Detecting file open functions
+        /import\s+socket/i, // Detecting socket imports for remote communication
+        /import\s+requests/i // Detecting requests import for HTTP access
+    ];
+
+    // Check the code for any dangerous patterns
+    for (let pattern of dangerousPatterns) {
+        if (pattern.test(code)) {
+            return true; // Code is malicious
+        }
+    }
+    return false; // No malicious code detected
+}
+
 // Load Pyodide and initialize CodeMirror
 async function loadPyodideAndSetup() {
     const loadingOverlay = document.getElementById('loadingOverlay');
@@ -152,32 +179,6 @@ function clearEditor() {
     document.getElementById('currentFileName').textContent = 'No file selected';
     editorInstance.setValue(''); // Clear editor content
     currentFile = null;
-}
-
-function logMaliciousActivity() {
-    console.warn(Malicious activity detected);
-}
-
-function isMaliciousCode(code) {
-    // Basic malicious code patterns to look for (e.g., system calls, dangerous imports)
-    const dangerousPatterns = [
-        /import\s+(os|subprocess|sys|platform)/i, // Detecting dangerous imports
-        /os\./i, // Checking for system-level commands like os.system()
-        /subprocess\./i, // Checking for subprocess usage
-        /eval\(/i, // Detecting eval function
-        /exec\(/i, // Detecting exec function
-        /open\(/i, // Detecting file open functions
-        /import\s+socket/i, // Detecting socket imports for remote communication
-        /import\s+requests/i // Detecting requests import for HTTP access
-    ];
-
-    // Check the code for any dangerous patterns
-    for (let pattern of dangerousPatterns) {
-        if (pattern.test(code)) {
-            return true; // Code is malicious
-        }
-    }
-    return false; // No malicious code detected
 }
 
 // Function to run and manage user-submitted code
