@@ -3,17 +3,14 @@ let pyodide = null;
 let files = {}; // This will hold the code of each file
 let currentFile = null;
 let editorInstance = null;
-let bannedIPs = new Set(); 
-let userIP = "192.168.1.1";
 
 
-function banIP(ip) {
-    bannedIPs.add(ip);
-    console.warn(`IP ${ip} has been banned for submitting malicious code.`);
+function warnUser() {
+    console.warn(`You have been banned for submitting malicious code.`);
 }
 
-function logMaliciousActivity(ip) {
-    console.warn(`Malicious activity detected from IP: ${ip}`);
+function logMaliciousActivity() {
+    console.warn(`Malicious activity detected`);
 }
 
 function isMaliciousCode(code) {
@@ -174,8 +171,8 @@ async function runCode() {
 
     // Check if the code is malicious before running it
     if (isMaliciousCode(code)) {
-        logMaliciousActivity(userIP); // Log the malicious activity
-        banIP(userIP); // Ban the IP
+        logMaliciousActivity(); // Log the malicious activity
+        warnUser(); 
         document.getElementById('output').textContent = "Error: Malicious code detected. Your IP has been banned.";
         return;
     }
