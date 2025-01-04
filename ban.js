@@ -3,14 +3,14 @@ import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.0.0/
 
 // Your Firebase configuration
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  databaseURL: "YOUR_DATABASE_URL",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID",
-  measurementId: "YOUR_MEASUREMENT_ID"
+  apiKey: "AIzaSyBXG8v7UzzGv_UT7ZaO_RMKbvh17Kmy7lU",
+  authDomain: "compyle-f584b.firebaseapp.com",
+  databaseURL: "https://compyle-f584b-default-rtdb.firebaseio.com",
+  projectId: "compyle-f584b",
+  storageBucket: "compyle-f584b.firebasestorage.app",
+  messagingSenderId: "530949114306",
+  appId: "1:530949114306:web:c475476274050a5d1f6e5b",
+  measurementId: "G-KWSR49792B"
 };
 
 // Initialize Firebase
