@@ -170,15 +170,15 @@ async function runCode() {
     // Check for malicious code
     if (isMaliciousCode(code)) {
       logMaliciousActivity();  // Log the malicious activity
+      document.getElementById('output').textContent = "Error: Malicious code detected";
+      return; // Stop further execution if malicious code is detected
+    }
 
-      document.getElementById('output').textContent =
-        "Error: Malicious code detected";
-      
+    // Execute the Python code if it's safe
     await executePythonCode(code);
   } catch (error) {
     console.error("Error in runCode:", error);
-    document.getElementById('output').textContent =
-      `Unexpected error: ${error.message}`;
+    document.getElementById('output').textContent = `Unexpected error: ${error.message}`;
   }
 }
 
