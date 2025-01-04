@@ -17,8 +17,47 @@ async function loadPyodideAndSetup() {
         editorInstance = CodeMirror.fromTextArea(editorElement, {
             mode: 'python',
             lineNumbers: true,
-            theme: 'material-darker', 
+            theme: 'material-darker',
+            matchBrackets: true,
+            autoCloseBrackets: {
+                override: true,
+                pairs: "()[]{}''\"\"", // Exclude double quotes here
+                closeBefore: ")]}:;",
+                triples: "",
+                explode: "()[]{}",
+            },
+            extraKeys: {
+                "'": function (cm) {
+                    const cursor = cm.getCursor();
+                    const token = cm.getTokenAt(cursor);
+
+                    if (token.type === "string") {
+                        // Insert a single quote without closing if inside a string
+                        cm.replaceSelection("'", "end");
+                    } else {
+                        // Insert a pair of single quotes and place cursor in the middle
+                        cm.replaceSelection("''");
+                        cm.setCursor(cursor.line, cursor.ch + 1);
+                    }
+                },
+                '"': function (cm) {
+                    const cursor = cm.getCursor();
+                    const token = cm.getTokenAt(cursor);
+
+                    if (token.type === "string") {
+                        // Insert a double quote without closing if inside a string
+                        cm.replaceSelection('"', "end");
+                    } else {
+                        // Auto-close double quotes outside strings
+                        cm.replaceSelection('""');
+                        cm.setCursor(cursor.line, cursor.ch + 1);
+                    }
+                },
+            },
         });
+
+
+
 
         if (!Object.keys(files).length) {
             createFile('main.py', true);
@@ -28,7 +67,6 @@ async function loadPyodideAndSetup() {
         loadingOverlay.classList.remove('visible');
     }
 }
-
 window.onload = loadPyodideAndSetup;
 
 // Update the file list in the UI
@@ -98,12 +136,12 @@ function openFile(fileName) {
 // Clear editor
 function clearEditor() {
     document.getElementById('currentFileName').textContent = 'No file selected';
-    document.getElementById('editor').value = '';
+    editorInstance.setValue(''); // Clear editor content
     currentFile = null;
 }
 
 async function runCode() {
-    saveCurrentFile(); // Save current content
+    saveCurrentFile();
     const code = files[currentFile];
 
     try {
@@ -118,6 +156,10 @@ async function runCode() {
     } catch (err) {
         console.error("Execution error:", err);
         document.getElementById('output').textContent = `Error: ${err.message}`;
+    } finally {
+        await pyodide.runPythonAsync(`
+            sys.stdout = sys.__stdout__
+        `);
     }
 }
 
