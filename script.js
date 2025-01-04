@@ -165,12 +165,15 @@ function clearEditor() {
     currentFile = null;
 }
 
+import { set, ref, child, get } from "firebase/database"; // Import Firebase functions
+
+// Function to ban an IP address
 export async function banIP(ip) {
   try {
     await set(ref(database, `bannedIPs/${ip}`), true);
     console.log(`IP ${ip} has been successfully banned.`);
   } catch (error) {
-    console.error("Error banning IP:", error);
+    console.error(`Error banning IP (${ip}):`, error);
   }
 }
 
@@ -181,67 +184,8 @@ export async function isIPBanned(ip) {
     const snapshot = await get(child(dbRef, `bannedIPs/${ip}`));
     return snapshot.exists();
   } catch (error) {
-    console.error("Error checking if IP is banned:", error);
-    return false;
-  }
-}
-
-async function runCode() {
-  // Save current file content before running it
-  saveCurrentFile();
-  
-  const code = files[currentFile];
-
-  // Check if the code is malicious before running it
-  if (isMaliciousCode(code)) {
-    logMaliciousActivity(); // Log the malicious activity
-    warnUser(); // Notify the user
-    
-    document.getElementById('output').textContent = "Error: Malicious code detected. Your IP has been banned.";
-    
-    // Dynamically import ban.js and ban the user's IP
-    try {
-      
-      // Get the user's IP address dynamically
-      const userIP = await getUserIP();
-      
-      if (userIP) {
-        // Call the banIP function to ban the user's IP
-        await banIP(userIP);
-        console.log(`IP ${userIP} has been banned due to malicious activity.`);
-      } else {
-        console.error("Failed to fetch user's IP.");
-      }
-    } catch (error) {
-      console.error("Failed to ban IP:", error);
-    }
-    
-    return; // Stop further execution if code is malicious
-  }
-
-  try {
-    // Run the Python code using Pyodide
-    await pyodide.runPythonAsync(`
-      import sys
-      from io import StringIO
-      sys.stdout = StringIO()
-    `);
-    
-    // Execute the user code in Python
-    await pyodide.runPythonAsync(code);
-    
-    // Capture the output
-    const output = await pyodide.runPythonAsync(`sys.stdout.getvalue()`);
-    document.getElementById('output').textContent = output;
-  } catch (err) {
-    // Handle any errors during code execution
-    console.error("Execution error:", err);
-    document.getElementById('output').textContent = `Error: ${err.message}`;
-  } finally {
-    // Reset the stdout back to default after execution
-    await pyodide.runPythonAsync(`
-      sys.stdout = sys.__stdout__
-    `);
+    console.error(`Error checking if IP (${ip}) is banned:`, error);
+    return false; // Default to not banned on error
   }
 }
 
@@ -249,13 +193,84 @@ async function runCode() {
 async function getUserIP() {
   try {
     const response = await fetch('https://api.ipify.org?format=json');
+    if (!response.ok) {
+      throw new Error(`HTTP error: ${response.status}`);
+    }
     const data = await response.json();
     return data.ip;
   } catch (error) {
-    console.error("Failed to get IP address:", error);
-    return null; // Fallback to null if we can't retrieve the IP
+    console.error("Failed to fetch user's IP address:", error);
+    return null; // Return null if unable to fetch IP
   }
 }
+
+// Function to run and manage user-submitted code
+async function runCode() {
+  try {
+    // Save current file content before execution
+    saveCurrentFile();
+    const code = files[currentFile];
+
+    // Check for malicious code
+    if (isMaliciousCode(code)) {
+      logMaliciousActivity(); // Log the malicious activity
+      warnUser(); // Notify the user
+
+      document.getElementById('output').textContent =
+        "Error: Malicious code detected. Your IP has been banned.";
+
+      // Attempt to ban the user's IP
+      try {
+        const userIP = await getUserIP();
+        if (userIP) {
+          await banIP(userIP);
+          console.log(`IP ${userIP} has been banned due to malicious activity.`);
+        } else {
+          console.warn("Could not retrieve user's IP for banning.");
+        }
+      } catch (banError) {
+        console.error("Failed to ban user's IP:", banError);
+      }
+
+      return; // Stop further execution if code is malicious
+    }
+
+    // Run the user-submitted code using Pyodide
+    await executePythonCode(code);
+  } catch (error) {
+    console.error("Error in runCode:", error);
+    document.getElementById('output').textContent =
+      `Unexpected error: ${error.message}`;
+  }
+}
+
+// Function to execute Python code safely using Pyodide
+async function executePythonCode(code) {
+  try {
+    // Initialize stdout redirection in Pyodide
+    await pyodide.runPythonAsync(`
+      import sys
+      from io import StringIO
+      sys.stdout = StringIO()
+    `);
+
+    // Execute the Python code
+    await pyodide.runPythonAsync(code);
+
+    // Capture and display the output
+    const output = await pyodide.runPythonAsync(`sys.stdout.getvalue()`);
+    document.getElementById('output').textContent = output;
+  } catch (executionError) {
+    // Handle Python code execution errors
+    console.error("Python execution error:", executionError);
+    document.getElementById('output').textContent =
+      `Error during execution: ${executionError.message}`;
+  } finally {
+    // Reset stdout back to default
+    await pyodide.runPythonAsync(`sys.stdout = sys.__stdout__`);
+  }
+}
+
 
 
 
