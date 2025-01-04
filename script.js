@@ -4,33 +4,6 @@ let files = {}; // This will hold the code of each file
 let currentFile = null;
 let editorInstance = null;
 
-function logMaliciousActivity() {
-    console.warn(`Malicious activity detected`);
-}
-
-function isMaliciousCode(code) {
-    // Basic malicious code patterns to look for (e.g., system calls, dangerous imports)
-    const dangerousPatterns = [
-        /import\s+(os|subprocess|sys|platform)/i, // Detecting dangerous imports
-        /os\./i, // Checking for system-level commands like os.system()
-        /subprocess\./i, // Checking for subprocess usage
-        /eval\(/i, // Detecting eval function
-        /exec\(/i, // Detecting exec function
-        /open\(/i, // Detecting file open functions
-        /import\s+socket/i, // Detecting socket imports for remote communication
-        /import\s+requests/i // Detecting requests import for HTTP access
-    ];
-
-    // Check the code for any dangerous patterns
-    for (let pattern of dangerousPatterns) {
-        if (pattern.test(code)) {
-            return true; // Code is malicious
-        }
-    }
-    return false; // No malicious code detected
-}
-
-
 // Load Pyodide and initialize CodeMirror
 async function loadPyodideAndSetup() {
     const loadingOverlay = document.getElementById('loadingOverlay');
@@ -79,6 +52,9 @@ async function loadPyodideAndSetup() {
             },
         });
 
+        // Load files from localStorage
+        loadFilesFromLocalStorage();
+
         if (!Object.keys(files).length) {
             createFile('main.py', true);
         }
@@ -87,6 +63,7 @@ async function loadPyodideAndSetup() {
         loadingOverlay.classList.remove('visible');
     }
 }
+
 window.onload = loadPyodideAndSetup;
 
 // Update the file list in the UI
@@ -107,6 +84,7 @@ function createFile(fileName = null, isInitial = false) {
     }
     files[fileName] = isInitial ? 'print("Hello world")' : ''; // Default code or empty
     createFileListItem(fileName);
+    saveFilesToLocalStorage(); // Save files to localStorage after creation
 }
 
 // Create a file list item in the UI
@@ -132,9 +110,24 @@ function createFileListItem(fileName) {
     fileList.appendChild(fileItem);
 }
 
+// Save the current file content to `localStorage`
 function saveCurrentFile() {
     if (!currentFile) return;
     files[currentFile] = editorInstance.getValue();
+    saveFilesToLocalStorage(); // Save files to localStorage whenever a file is saved or edited
+}
+
+// Save all files to localStorage
+function saveFilesToLocalStorage() {
+    localStorage.setItem('files', JSON.stringify(files));
+}
+
+// Load files from localStorage
+function loadFilesFromLocalStorage() {
+    const savedFiles = localStorage.getItem('files');
+    if (savedFiles) {
+        files = JSON.parse(savedFiles);
+    }
 }
 
 // Delete a file
@@ -142,6 +135,7 @@ function deleteFile(fileName) {
     if (confirm(`Delete "${fileName}"?`)) {
         delete files[fileName];
         updateFileList();
+        saveFilesToLocalStorage(); // Save updated files list to localStorage
     }
 }
 
@@ -204,11 +198,6 @@ async function executePythonCode(code) {
   }
 }
 
-
-
-
-
-
 // Download the current file
 function downloadCode() {
     if (!currentFile) {
@@ -239,42 +228,3 @@ function downloadCode() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 }
-
-// Add a new function to format the code using autopep8
-async function formatCode() {
-    if (!currentFile) return;
-
-    const code = editorInstance.getValue();
-
-    try {
-        // Ensure the autopep8 package is loaded before formatting
-        await pyodide.loadPackage('micropip');
-        await pyodide.runPythonAsync(`
-            import micropip
-            await micropip.install("autopep8")
-        `);
-
-        // Use Pyodide to run the autopep8 formatting
-        const formattedCode = await pyodide.runPythonAsync(`
-            import autopep8
-            formatted_code = autopep8.fix_code(${JSON.stringify(code)})
-            formatted_code
-        `);
-
-        // Update the editor with the formatted code
-        editorInstance.setValue(formattedCode);
-    } catch (err) {
-        console.error("Formatting error:", err);
-        document.getElementById('output').textContent = `Error formatting code: ${err.message}`;
-    }
-}
-
-// Add a "Format Code" button to the UI
-document.addEventListener('DOMContentLoaded', function() {
-    const formatButton = document.createElement('button');
-    formatButton.textContent = 'Format Code';
-    formatButton.onclick = formatCode;
-
-    const editorPanel = document.querySelector('.editor-panel');
-    editorPanel.appendChild(formatButton);
-});
