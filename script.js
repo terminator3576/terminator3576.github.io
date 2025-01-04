@@ -165,6 +165,17 @@ function clearEditor() {
     currentFile = null;
 }
 
+async function getUserIP() {
+    try {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        return data.ip;
+    } catch (error) {
+        console.error('Error fetching IP:', error);
+        return null; // Return null in case of error
+    }
+}
+
 async function runCode() {
     saveCurrentFile();
     const code = files[currentFile];
@@ -174,6 +185,21 @@ async function runCode() {
         logMaliciousActivity(); // Log the malicious activity
         warnUser(); 
         document.getElementById('output').textContent = "Error: Malicious code detected. Your IP has been banned.";
+
+        // Get the user's IP address automatically
+        const userIP = await getUserIP();
+        
+        if (userIP) {
+            // Send a request to ban.js to ban the user's IP
+            try {
+                await banIP(userIP); // Make sure the banIP function is defined in ban.js
+            } catch (error) {
+                console.error("Failed to ban IP:", error);
+            }
+        } else {
+            console.error("Unable to get user's IP to ban.");
+        }
+
         return;
     }
 
@@ -195,6 +221,7 @@ async function runCode() {
         `);
     }
 }
+
 
 // Download the current file
 function downloadCode() {
