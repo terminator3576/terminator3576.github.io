@@ -165,6 +165,18 @@ function clearEditor() {
     currentFile = null;
 }
 
+async function banIP(ip) {
+    try {
+        // Ensure that the IP address is safe to store by replacing '.' with '_'
+        const safeIP = ip.replace(/\./g, '_');
+        
+        await set(ref(database, "bannedIPs/" + safeIP), true);
+        console.log(`IP ${ip} has been banned.`);
+    } catch (error) {
+        console.error("Error banning IP:", error);
+    }
+}
+
 async function runCode() {
   // Save current file content before running it
   saveCurrentFile();
@@ -180,8 +192,6 @@ async function runCode() {
     
     // Dynamically import ban.js and ban the user's IP
     try {
-      // Import the ban.js script and extract the `banIP` function
-      const { banIP } = await import('./ban.js');
       
       // Get the user's IP address dynamically
       const userIP = await getUserIP();
@@ -194,7 +204,7 @@ async function runCode() {
         console.error("Failed to fetch user's IP.");
       }
     } catch (error) {
-      console.error("Failed to import ban.js or ban IP:", error);
+      console.error("Failed to ban IP:", error);
     }
     
     return; // Stop further execution if code is malicious
