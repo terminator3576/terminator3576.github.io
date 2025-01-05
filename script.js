@@ -111,7 +111,6 @@ function createFile(fileName = null, isInitial = false) {
     }
     files[fileName] = isInitial ? 'print("Hello world")' : ''; // Default code or empty
     createFileListItem(fileName);
-    saveFilesToLocalStorage(); // Save files to localStorage after creation
 }
 
 // Create a file list item in the UI
@@ -137,16 +136,17 @@ function createFileListItem(fileName) {
     fileList.appendChild(fileItem);
 }
 
-// Save the current file content to `localStorage`
+// Save the current file content
 function saveCurrentFile() {
     if (!currentFile) return;
     files[currentFile] = editorInstance.getValue();
-    saveFilesToLocalStorage(); // Save files to localStorage whenever a file is saved or edited
 }
 
-// Save all files to localStorage
-function saveFilesToLocalStorage() {
+// Save all files to localStorage when save button is clicked
+function saveCode() {
+    saveCurrentFile(); // Ensure the current file is saved
     localStorage.setItem('files', JSON.stringify(files));
+    alert("Code saved successfully!");
 }
 
 // Load files from localStorage
@@ -155,6 +155,7 @@ function loadFilesFromLocalStorage() {
     if (savedFiles) {
         files = JSON.parse(savedFiles);
     }
+    updateFileList();
 }
 
 // Delete a file
@@ -162,7 +163,6 @@ function deleteFile(fileName) {
     if (confirm(`Delete "${fileName}"?`)) {
         delete files[fileName];
         updateFileList();
-        saveFilesToLocalStorage(); // Save updated files list to localStorage
     }
 }
 
@@ -183,75 +183,53 @@ function clearEditor() {
 
 // Function to run and manage user-submitted code
 async function runCode() {
-  try {
-    // Save current file content before execution (assuming `saveCurrentFile()` is defined elsewhere)
-    saveCurrentFile();
-    const code = files[currentFile];  // Assuming `files[currentFile]` holds the code to execute
+    try {
+        saveCurrentFile(); // Save current file content before execution
+        const code = files[currentFile]; // Get the code to execute
 
-    // Check for malicious code
-    if (isMaliciousCode(code)) {
-      logMaliciousActivity();  // Log the malicious activity
-      document.getElementById('output').textContent = "Error: Malicious code detected";
-      return; // Stop further execution if malicious code is detected
+        // Check for malicious code
+        if (isMaliciousCode(code)) {
+            logMaliciousActivity(); // Log the malicious activity
+            document.getElementById('output').textContent = "Error: Malicious code detected";
+            return; // Stop further execution if malicious code is detected
+        }
+
+        // Execute the Python code if it's safe
+        await executePythonCode(code);
+    } catch (error) {
+        console.error("Error in runCode:", error);
+        document.getElementById('output').textContent = `Unexpected error: ${error.message}`;
     }
-
-    // Execute the Python code if it's safe
-    await executePythonCode(code);
-  } catch (error) {
-    console.error("Error in runCode:", error);
-    document.getElementById('output').textContent = `Unexpected error: ${error.message}`;
-  }
 }
 
 // Function to execute Python code safely using Pyodide
 async function executePythonCode(code) {
-  try {
-    await pyodide.runPythonAsync(`
-      import sys
-      from io import StringIO
-      sys.stdout = StringIO()
-    `);
+    try {
+        await pyodide.runPythonAsync(`
+            import sys
+            from io import StringIO
+            sys.stdout = StringIO()
+        `);
 
-    await pyodide.runPythonAsync(code);
+        await pyodide.runPythonAsync(code);
 
-    const output = await pyodide.runPythonAsync(`sys.stdout.getvalue()`);
-    document.getElementById('output').textContent = output;
-  } catch (executionError) {
-    console.error("Python execution error:", executionError);
-    document.getElementById('output').textContent =
-      `Error during execution: ${executionError.message}`;
-  } finally {
-    await pyodide.runPythonAsync(`sys.stdout = sys.__stdout__`);
-  }
+        const output = await pyodide.runPythonAsync(`sys.stdout.getvalue()`);
+        document.getElementById('output').textContent = output;
+    } catch (executionError) {
+        console.error("Python execution error:", executionError);
+        document.getElementById('output').textContent =
+            `Error during execution: ${executionError.message}`;
+    } finally {
+        await pyodide.runPythonAsync(`sys.stdout = sys.__stdout__`);
+    }
 }
 
-// Download the current file
-function downloadCode() {
-    if (!currentFile) {
-        alert("No file selected to download.");
-        return;
-    }
+// Add a "Save Code" button to the UI
+document.addEventListener('DOMContentLoaded', function () {
+    const saveButton = document.createElement('button');
+    saveButton.textContent = 'Save Code';
+    saveButton.onclick = saveCode;
 
-    const fileName = currentFile; // Get the current file's name
-    const code = files[currentFile]; // Get the code content of the current file
-
-    if (!code) {
-        alert("The file is empty. Nothing to download.");
-        return;
-    }
-
-    // Create a blob from the code
-    const blob = new Blob([code], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-
-    // Create a temporary anchor element to trigger the download
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileName; // File name with the ".py" extension
-    document.body.appendChild(a);
-    a.click();
-
-    // Clean up the temporary anchor element
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
+    const editorPanel = document.querySelector('.editor-panel');
+    editorPanel.appendChild(saveButton);
+});
