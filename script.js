@@ -224,3 +224,33 @@ async function executePythonCode(code) {
         await pyodide.runPythonAsync(`sys.stdout = sys.__stdout__`);
     }
 }
+
+function downloadCode() {
+    if (!currentFile) {
+        alert("No file selected to download.");
+        return;
+    }
+
+    const fileName = currentFile; // Get the current file's name
+    const code = files[currentFile]; // Get the code content of the current file
+
+    if (!code) {
+        alert("The file is empty. Nothing to download.");
+        return;
+    }
+
+    // Create a blob from the code
+    const blob = new Blob([code], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+
+    // Create a temporary anchor element to trigger the download
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName; // File name with the ".py" extension
+    document.body.appendChild(a);
+    a.click();
+
+    // Clean up the temporary anchor element
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
