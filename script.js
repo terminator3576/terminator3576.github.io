@@ -34,6 +34,7 @@ function isMaliciousCode(code) {
 // Load Pyodide and initialize CodeMirror
 async function loadPyodideAndSetup() {
     const loadingOverlay = document.getElementById('loadingOverlay');
+    console.log(window.loadPyodide)
     loadingOverlay.classList.add('visible');
 
     try {
