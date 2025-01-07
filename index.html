@@ -53,11 +53,19 @@
     <div class="logo-container">
         <img src="assets/logo.webp" alt="Compiler Logo" class="logo">
     </div>
+    
 
     <div id="loadingOverlay" class="loading-overlay">
         <div class="loading-icon"></div>
         <div class="loading-text">Initialising Compyler</div>
     </div>
+
+    <div class="container">
+        <div class="file-panel">
+            <h2>Files</h2>
+            <button class="create-button" onclick="createFile()">+ Create File</button>
+            <ul id="fileList"></ul>
+        </div>
 
         <div class="main-content">
             <div class="editor-panel">
