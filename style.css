@@ -11,16 +11,6 @@ body {
     height: 100vh; /* Full viewport height */
 }
 
-.file-panel {
-    width: 15%; /* Smaller width for file panel */
-    padding: 20px;
-    background-color: #1a1a1a; /* Dark background */
-    border-right: 2px solid white; /* White border to separate file panel */
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-
 .create-button {
     background-color: #073564; /* Dark blue */
     color: #f4f4f4;
