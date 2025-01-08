@@ -78,7 +78,7 @@ function clearEditor() {
     editorInstance.setValue(''); // Clear editor content
 }
 
-// Function to run and manage user-submitted code
+// Function to run and manage user-submitted code with a timeout
 async function runCode() {
     try {
         const code = editorInstance.getValue(); // Get the code to execute
@@ -90,8 +90,14 @@ async function runCode() {
             return; // Stop further execution if malicious code is detected
         }
 
-        // Execute the Python code if it's safe
-        await executePythonCode(code);
+        // Execute the Python code if it's safe with a timeout
+        const timeout = 5000; // Set timeout duration in milliseconds
+        const executionPromise = executePythonCode(code);
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Execution timed out')), timeout)
+        );
+
+        await Promise.race([executionPromise, timeoutPromise]);
     } catch (error) {
         console.error("Error in runCode:", error);
         document.getElementById('output').textContent = `Unexpected error: ${error.message}`;
