@@ -1,8 +1,7 @@
 // Global variables
 let pyodide = null;
-let files = {}; // This will hold the code of each file
-let currentFile = null;
 let editorInstance = null;
+const defaultFileName = "main.py";
 
 // Malicious code checking functions
 function logMaliciousActivity() {
@@ -10,15 +9,14 @@ function logMaliciousActivity() {
 }
 
 function isMaliciousCode(code) {
-    // Basic malicious code patterns to look for (e.g., system calls, dangerous imports)
     const dangerousPatterns = [
-        /import\s+(os|subprocess|sys|platform)/i, // Detecting dangerous imports
+        /import\s+(os|subprocess|sys|platform)/i, 
         /os\./i, // Checking for system-level commands like os.system()
         /subprocess\./i, // Checking for subprocess usage
         /eval\(/i, // Detecting eval function
         /exec\(/i, // Detecting exec function
         /open\(/i, // Detecting file open functions
-        /import\s+socket/i, // Detecting socket imports for remote communication
+        /import\s+socket/i,
         /import\s+requests/i // Detecting requests import for HTTP access
     ];
 
@@ -41,6 +39,7 @@ async function loadPyodideAndSetup() {
 
         // Initialize CodeMirror
         const editorElement = document.getElementById('editor');
+        editorElement.style.height = "900vh";
         editorInstance = CodeMirror.fromTextArea(editorElement, {
             mode: 'python',
             lineNumbers: true,
@@ -49,43 +48,16 @@ async function loadPyodideAndSetup() {
             autoCloseBrackets: {
                 override: true,
                 pairs: "()[]{}''\"\"",
-                closeBefore: ")]}:;",
+                closeBefore: ")]};",
                 triples: "",
                 explode: "()[]{}",
             },
-            extraKeys: {
-                "'": function (cm) {
-                    const cursor = cm.getCursor();
-                    const token = cm.getTokenAt(cursor);
-
-                    if (token.type === "string") {
-                        cm.replaceSelection("'", "end");
-                    } else {
-                        cm.replaceSelection("''");
-                        cm.setCursor(cursor.line, cursor.ch + 1);
-                    }
-                },
-                '"': function (cm) {
-                    const cursor = cm.getCursor();
-                    const token = cm.getTokenAt(cursor);
-
-                    if (token.type === "string") {
-                        cm.replaceSelection('"', "end");
-                    } else {
-                        cm.replaceSelection('""');
-                        cm.setCursor(cursor.line, cursor.ch + 1);
-                    }
-                },
-            },
         });
 
-        // Load files from localStorage
-        loadFilesFromLocalStorage();
-
-        if (!Object.keys(files).length) {
-            createFile('main.py', true);
-        }
-        openFile(Object.keys(files)[0]);
+        // Load content from localStorage or use a default
+        const savedCode = localStorage.getItem(defaultFileName) || 'print("Hello world")';
+        editorInstance.setValue(savedCode);
+        document.getElementById('currentFileName').textContent = `File: ${defaultFileName}`;
     } finally {
         loadingOverlay.classList.remove('visible');
     }
@@ -93,99 +65,23 @@ async function loadPyodideAndSetup() {
 
 window.onload = loadPyodideAndSetup;
 
-// Update the file list in the UI
-function updateFileList() {
-    const fileList = document.getElementById('fileList');
-    fileList.innerHTML = '';
-    for (const fileName in files) {
-        createFileListItem(fileName);
-    }
-}
-
-// Create a new file
-function createFile(fileName = null, isInitial = false) {
-    fileName = fileName || prompt('Enter file name:', `file${Object.keys(files).length + 1}.py`);
-    if (!fileName || files[fileName]) {
-        console.warn(`File creation skipped: ${fileName ? `"${fileName}" already exists.` : "Invalid file name."}`);
-        return;
-    }
-    files[fileName] = isInitial ? 'print("Hello world")' : ''; // Default code or empty
-    createFileListItem(fileName);
-}
-
-// Create a file list item in the UI
-function createFileListItem(fileName) {
-    const fileList = document.getElementById('fileList');
-    const fileItem = document.createElement('li');
-    fileItem.className = 'file-item';
-
-    const fileButton = document.createElement('button');
-    fileButton.textContent = fileName;
-    fileButton.className = 'file-name';
-    fileButton.onclick = () => {
-        openFile(fileName); // Open the clicked file
-    };
-
-    const deleteButton = document.createElement('button');
-    deleteButton.className = 'menu-button';
-    deleteButton.textContent = '...';
-    deleteButton.onclick = () => deleteFile(fileName);
-
-    fileItem.appendChild(fileButton);
-    fileItem.appendChild(deleteButton);
-    fileList.appendChild(fileItem);
-}
-
-// Save the current file content
-function saveCurrentFile() {
-    if (!currentFile) return;
-    files[currentFile] = editorInstance.getValue();
-}
-
-// Save all files to localStorage when save button is clicked
+// Save code to localStorage
 function saveCode() {
-    saveCurrentFile(); // Ensure the current file is saved
-    localStorage.setItem('files', JSON.stringify(files));
+    const code = editorInstance.getValue();
+    localStorage.setItem(defaultFileName, code);
     alert("Code saved successfully!");
-}
-
-// Load files from localStorage
-function loadFilesFromLocalStorage() {
-    const savedFiles = localStorage.getItem('files');
-    if (savedFiles) {
-        files = JSON.parse(savedFiles);
-    }
-    updateFileList();
-}
-
-// Delete a file
-function deleteFile(fileName) {
-    if (confirm(`Delete "${fileName}"?`)) {
-        delete files[fileName];
-        updateFileList();
-    }
-}
-
-// Open a file
-function openFile(fileName) {
-    if (!files[fileName]) return;
-    currentFile = fileName;
-    document.getElementById('currentFileName').textContent = `File: ${fileName}`;
-    editorInstance.setValue(files[fileName]);
 }
 
 // Clear editor
 function clearEditor() {
-    document.getElementById('currentFileName').textContent = 'No file selected';
+    document.getElementById('currentFileName').textContent = `File: ${defaultFileName}`;
     editorInstance.setValue(''); // Clear editor content
-    currentFile = null;
 }
 
 // Function to run and manage user-submitted code
 async function runCode() {
     try {
-        saveCurrentFile(); // Save current file content before execution
-        const code = files[currentFile]; // Get the code to execute
+        const code = editorInstance.getValue(); // Get the code to execute
 
         // Check for malicious code
         if (isMaliciousCode(code)) {
@@ -224,14 +120,9 @@ async function executePythonCode(code) {
     }
 }
 
+// Download code as a file
 function downloadCode() {
-    if (!currentFile) {
-        alert("No file selected to download.");
-        return;
-    }
-
-    const fileName = currentFile; // Get the current file's name
-    const code = files[currentFile]; // Get the code content of the current file
+    const code = editorInstance.getValue();
 
     if (!code) {
         alert("The file is empty. Nothing to download.");
@@ -245,7 +136,7 @@ function downloadCode() {
     // Create a temporary anchor element to trigger the download
     const a = document.createElement("a");
     a.href = url;
-    a.download = fileName; // File name with the ".py" extension
+    a.download = defaultFileName; 
     document.body.appendChild(a);
     a.click();
 
