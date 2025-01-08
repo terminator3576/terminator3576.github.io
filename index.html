@@ -60,22 +60,18 @@
         <div class="loading-text">Initialising Compyler</div>
     </div>
 
-    <div class="container">
-        <div class="file-panel">
-            <h2>Files</h2>
-            <button class="create-button" onclick="createFile()">+ Create File</button>
-            <ul id="fileList"></ul>
-        </div>
+    <div class="run-button">
+        <button id="runButton" onclick="runCode()">Run</button>
+    </div>
 
         <div class="main-content">
             <div class="editor-panel">
                 <h2 id="currentFileName">File: main.py</h2>
                 <textarea id="editor" placeholder="Your python code goes here…"></textarea>
-                <button id="runButton" onclick="runCode()">Run</button>
             </div>
 
             <div class="output-panel">
-                <h2>Output</h2>
+                <h2>&nbsp&nbspOutput</h2>
                 <pre id="output">View the results of your code here</pre>
             </div>
         </div>
