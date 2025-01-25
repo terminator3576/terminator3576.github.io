@@ -10,11 +10,21 @@ body {
     font-family: Arial, sans-serif;
     background-color: #222;
     color: #fff;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden; /* Prevent scrolling */
+}
+
+main {
+    flex-grow: 1;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: 100vh;
-    overflow: hidden;
+    justify-content: center;
 }
 
 /* Header */
@@ -50,25 +60,25 @@ nav ul li a:hover {
 /* Tab Content */
 .tab-content {
     width: 100%;
-    height: calc(100% - 70px); /* Account for header height */
+    height: 100%;
     display: none;
-    position: relative;
+    padding: 20px;
+    background-color: #1e1e2e;
 }
-
 /* CodeMirror Editor */
 .editor-container {
+    flex-grow: 1;
     width: 100%;
     height: calc(100% - 50px); /* Leave space for the "Save Bot" button */
-    margin-top: 20px;
-    position: relative;
-    background: #222; /* Ensure a visible background while CodeMirror initializes */
+    display: flex;
+    flex-direction: column;
     border-radius: 10px;
     overflow: hidden;
+    margin-top: 20px;
 }
 
-/* Hide default textarea after CodeMirror initializes */
 textarea#code-editor {
-    display: none; /* CodeMirror will replace this element */
+    display: none;
 }
 
 
@@ -100,6 +110,23 @@ textarea#code-editor {
     margin-top: 20px;
     background-color: #ff4d4d;
 }
+
+button {
+    margin-top: 10px;
+    align-self: flex-start;
+    padding: 10px 20px;
+    background-color: #4ecca3;
+    border: none;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #65d6b7;
+}
+
 
 /* Modal */
 .modal {
