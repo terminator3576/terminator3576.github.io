@@ -13,7 +13,8 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
+    height: 100vh;
+    overflow: hidden;
 }
 
 /* Header */
@@ -48,54 +49,45 @@ nav ul li a:hover {
 
 /* Tab Content */
 .tab-content {
-    width: 80%;
-    max-width: 900px;
-    padding: 20px;
-    margin-top: 20px;
-    background-color: #333;
-    border-radius: 10px;
+    width: 100%;
+    height: calc(100% - 70px); /* Account for header height */
     display: none;
+    position: relative;
 }
 
-.tab-content h1, .tab-content h2, .tab-content h3 {
-    margin-bottom: 15px;
+/* CodeMirror Editor */
+.editor-container {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 
-button {
-    padding: 10px 20px;
-    background-color: #4ecca3;
-    border: none;
-    color: white;
-    font-size: 1rem;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-button:hover {
-    background-color: #65d6b7;
+textarea#code-editor {
+    width: 100%;
+    height: 100%;
+    display: none; /* CodeMirror will replace this */
 }
 
 /* Arena Container */
 .arena-container {
-    position: relative;
+    width: 100%;
+    height: 100%;
 }
 
 .arena-background {
-    background-image: url('arena-image.jpg'); /* Add your arena background image here */
+    background-image: url('assets/arena.avif'); /* Use arena.avif as the background image */
     background-size: cover;
     background-position: center;
     width: 100%;
-    height: 400px;
-    position: relative;
-    text-align: center;
-    padding: 20px;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 }
 
 #start-battle-btn {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+    margin-top: 20px;
     background-color: #ff4d4d;
 }
 
