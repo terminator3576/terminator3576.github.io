@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Battle Arena - Settings</title>
+    <style>
+        /* Reset */
+        body, html {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Fullscreen layout */
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        /* Notification Header */
+        .notification {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #4ecca3;
+            color: #000;
+            text-align: center;
+            font-size: 1.2rem;
+            padding: 10px 0;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .notification.show {
+            opacity: 1;
+        }
+
+        .notification.fade-out {
+            opacity: 0;
+        }
+
+        /* Settings container */
+        .settings-container {
+            max-width: 800px;
+            width: 100%;
+            text-align: left;
+            padding: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Title */
+        .settings-title {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
+        }
+
+        /* Sections */
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #4ecca3;
+        }
+
+        .slider-container {
+            margin: 15px 0;
+        }
+
+        /* Slider */
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .slider {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        /* Dropdown and options */
+        .dropdown {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        /* Buttons */
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        .reset-button {
+            background: #ff4d4d;
+        }
+
+        .reset-button:hover {
+            background: #ff6666;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+            transform: translateY(-3px);
+        }
+
+        .back-button {
+            background: #4ecca3;
+        }
+
+        .back-button:hover {
+            background: #65d6b7;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Notification Header -->
+    <div class="notification" id="notification">Settings have been reset to default!</div>
+
+    <div class="settings-container">
+        <!-- Title -->
+        <h1 class="settings-title">Settings</h1>
+
+        <!-- Audio Settings -->
+        <div class="section">
+            <h2 class="section-title">Audio Settings</h2>
+            <div class="slider-container">
+                <div class="slider-label">
+                    <label for="music-volume">Background Music</label>
+                    <span id="music-volume-value">50</span>
+                </div>
+                <input type="range" id="music-volume" class="slider" min="0" max="100" 
+                    oninput="updateSliderValue('music-volume', 'music-volume-value'); setMusicVolume(this.value);">
+            </div>
+            <div class="slider-container">
+                <div class="slider-label">
+                    <label for="effects-volume">Sound Effects</label>
+                    <span id="effects-volume-value">50</span>
+                </div>
+                <input type="range" id="effects-volume" class="slider" min="0" max="100" 
+                    oninput="updateSliderValue('effects-volume', 'effects-volume-value'); setEffectsVolume(this.value);">
+            </div>
+        </div>
+
+        <!-- Code Editor Settings -->
+        <div class="section">
+            <h2 class="section-title">Code Editor Settings</h2>
+            <div class="slider-container">
+                <div class="slider-label">
+                    <label for="font-size">Font Size</label>
+                    <span id="font-size-value">14</span>
+                </div>
+                <input type="range" id="font-size" class="slider" min="10" max="30" value="14" 
+                    oninput="updateSliderValue('font-size', 'font-size-value')">
+            </div>
+            <label for="editor-theme">Editor Theme</label>
+            <select id="editor-theme" class="dropdown">
+                <option value="default">Default</option>
+                <option value="dark">Dark</option>
+                <option value="light">Light</option>
+                <option value="monokai">Monokai</option>
+                <option value="dracula">Dracula</option>
+            </select>
+            <div class="slider-container">
+                <label for="tab-width">Tab Width</label>
+                <select id="tab-width" class="dropdown">
+                    <option value="2">2 spaces</option>
+                    <option value="4" selected>4 spaces</option>
+                    <option value="8">8 spaces</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="section">
+            <button class="reset-button button" onclick="resetSettings();">Reset to Default</button>
+            <button class="back-button button" onclick="savePreferences();">Back to Home</button>
+        </div>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="notification-sound" src="assets/audio/notification.mp3" preload="auto"></audio>
+
+    <script>
+        // Initialize settings on page load
+        window.onload = function() {
+            loadSettings();
+        };
+
+        // Update slider value display
+        function updateSliderValue(sliderId, valueId) {
+            const slider = document.getElementById(sliderId);
+            const valueDisplay = document.getElementById(valueId);
+            valueDisplay.textContent = slider.value;
+        }
+
+        // Reset settings to defaults
+        function resetSettings() {
+            localStorage.setItem('settings', JSON.stringify({
+                musicVolume: 50,
+                effectsVolume: 50
+                
+            }));
+
+            loadSettings();
+            showNotification('Settings have been reset to default!');
+        }
+
+        // Save preferences to local storage
+        function savePreferences() {
+            const preferences = {
+                musicVolume: document.getElementById('music-volume').value,
+                effectsVolume: document.getElementById('effects-volume').value
+            };
+
+            localStorage.setItem('settings', JSON.stringify(preferences));
+            window.location.href = 'index.html'; // Replace with your home page URL
+        }
+
+        // Load settings from local storage or use defaults
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem('settings')) || {
+                musicVolume: 50,
+                effectsVolume: 50
+            };
+
+            // Set values for sliders and background music
+            document.getElementById('music-volume').value = settings.musicVolume;
+            document.getElementById('effects-volume').value = settings.effectsVolume;
+
+            // Update visible values
+            updateSliderValue('music-volume', 'music-volume-value');
+            updateSliderValue('effects-volume', 'effects-volume-value');
+
+            // Apply settings
+            setMusicVolume(settings.musicVolume);
+            setEffectsVolume(settings.effectsVolume);
+        }
+
+        // Show notification message
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            const notificationSound = document.getElementById('notification-sound');
+            notificationSound.volume = getEffectsVolume();
+            
+            // Play the sound after a slight delay to ensure it works properly
+            setTimeout(() => {
+                notificationSound.play().catch((error) => console.error("Error playing sound:", error));
+            }, 300);
+
+            // Fade out after 3 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Set background music volume
+        function setMusicVolume(value) {
+            // Your logic for music volume control
+        }
+
+        // Set sound effects volume
+        function setEffectsVolume(value) {
+            const notificationSound = document.getElementById('notification-sound');
+            notificationSound.volume = value / 100;
+        }
+
+        // Get sound effects volume
+        function getEffectsVolume() {
+            const effectsVolume = document.getElementById('effects-volume').value;
+            return effectsVolume / 100;
+        }
+    </script>
+</body>
+</html>
