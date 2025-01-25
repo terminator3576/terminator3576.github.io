@@ -1,2 +1,2 @@
 # terminator3576.github.io
-An online python compiler
+A code controlled robot battle where you make the brains
