@@ -14,7 +14,8 @@ tabs.forEach(tab => {
         tabContents.forEach(content => content.style.display = 'none');
         
         // Show the clicked tab's content
-        document.getElementById(selectedTab).style.display = 'block';
+        const selectedTabContent = document.getElementById(selectedTab);
+        selectedTabContent.style.display = 'block';
 
         // Initialize CodeMirror when "Create Bots" tab is selected
         if (selectedTab === 'create-bots') {
@@ -23,7 +24,7 @@ tabs.forEach(tab => {
                 codeMirrorInstance = CodeMirror.fromTextArea(editorElement, {
                     lineNumbers: true,
                     mode: "javascript",
-                    theme: "material",
+                    theme: "dracula", // Dark blue theme
                 });
                 // Ensure CodeMirror fills its container
                 codeMirrorInstance.setSize("100%", "100%");
@@ -31,6 +32,7 @@ tabs.forEach(tab => {
         }
     });
 });
+
 
 
 // Show selected tab
