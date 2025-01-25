@@ -58,9 +58,19 @@ nav ul li a:hover {
 /* CodeMirror Editor */
 .editor-container {
     width: 100%;
-    height: 100%;
+    height: calc(100% - 50px); /* Leave space for the "Save Bot" button */
+    margin-top: 20px;
+    position: relative;
+    background: #222; /* Ensure a visible background while CodeMirror initializes */
+    border-radius: 10px;
     overflow: hidden;
 }
+
+/* Hide default textarea after CodeMirror initializes */
+textarea#code-editor {
+    display: none; /* CodeMirror will replace this element */
+}
+
 
 textarea#code-editor {
     width: 100%;
