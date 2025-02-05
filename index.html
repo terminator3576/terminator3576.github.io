@@ -1,122 +1,208 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bot Battle Arena</title>
-    <style>
-        /* Reset */
-        body, html {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-
-        /* Fullscreen layout */
-        body {
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* Container for the home screen */
-        .home-container {
-            text-align: center;
-            max-width: 600px;
-            padding: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            background: rgba(0, 0, 0, 0.5);
-            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Game title */
-        .game-title {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
-        }
-
-        /* Menu buttons */
-        .menu {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .menu-item {
-            margin: 15px 0;
-        }
-
-        .menu-button {
-            display: inline-block;
-            padding: 15px 30px;
-            font-size: 1.2rem;
-            color: white;
-            background: #1f4068;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-        }
-
-        .menu-button:hover {
-            background: #4ecca3;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
-            transform: translateY(-3px);
-        }
-
-        /* Footer text */
-        .footer {
-            margin-top: 30px;
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.7);
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FutureChat Landing Page</title>
+  <!-- Font Awesome for futuristic icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-p1CmN/D4Yoqk6sFXM5J+Ech8ZVemHujLkEkBvFAhWFPH2vAtNX5G1z8LL6CKiw1Dm24nZxBj6+gI96O3yyz1wA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    /* Reset default styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      height: 100%;
+      font-family: 'Arial', sans-serif;
+    }
+    
+    /* Hero Section with Animated Gradient Background */
+    .hero {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: #fff;
+      background: linear-gradient(45deg, #0a0f2c, #8b0000, #0a0f2c, #8b0000);
+      background-size: 400% 400%;
+      animation: gradient 15s ease infinite;
+    }
+    
+    @keyframes gradient {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+    
+    .username-box {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    }
+    
+    .username-box h1 {
+      margin-bottom: 15px;
+      font-size: 2rem;
+    }
+    
+    .username-box input {
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      width: 250px;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    
+    .username-box button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      background: #1e90ff;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    
+    .username-box button:hover {
+      background: #187bcd;
+    }
+    
+    /* Features Section - White background with futuristic icons */
+    .features {
+      background: #fff;
+      color: #333;
+      padding: 50px 20px;
+      text-align: center;
+    }
+    
+    .features h2 {
+      font-size: 2.5rem;
+      margin-bottom: 30px;
+    }
+    
+    .feature-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 40px;
+    }
+    
+    .feature {
+      width: 300px;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+      background: #f9f9f9;
+    }
+    
+    .feature:hover {
+      transform: translateY(-10px);
+    }
+    
+    .feature i {
+      font-size: 3rem;
+      color: #1e90ff;
+      margin-bottom: 15px;
+    }
+    
+    .feature h3 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+    
+    .feature p {
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+  </style>
 </head>
 <body>
-    <div class="home-container">
-        <!-- Game Title -->
-        <h1 class="game-title">Bot Battle Arena</h1>
-
-        <!-- Menu -->
-        <ul class="menu">
-            <li class="menu-item">
-                <button class="menu-button" onclick="startGame()">Start</button>
-            </li>
-            <li class="menu-item">
-                <button class="menu-button" onclick="howToPlay()">How to Play</button>
-            </li>
-            <li class="menu-item">
-                <button class="menu-button" onclick="openSettings()">Settings</button>
-            </li>
-        </ul>
-
-        <!-- Footer -->
-        <div class="footer">
-            © 2025 Your Name | All Rights Reserved
-        </div>
+  <!-- Hero Section with Animated Background and Username Input -->
+  <section class="hero">
+    <div class="username-box">
+      <h1>Welcome to FutureChat</h1>
+      <input type="text" id="username" placeholder="Enter your username">
+      <br>
+      <button onclick="proceed()">Enter</button>
     </div>
+  </section>
 
-    <!-- JavaScript Functions -->
-    <script>
-        function startGame() {
-            window.location.href = "game.html";
-        }
+  <!-- Features Section with Futuristic Icons -->
+  <section class="features">
+    <h2>Discover the Future of Messaging</h2>
+    <div class="feature-container">
+      <div class="feature">
+        <i class="fas fa-shield-alt"></i>
+        <h3>Unmatched Security</h3>
+        <p>Our platform utilizes cutting-edge encryption to protect your data and conversations.</p>
+      </div>
+      <div class="feature">
+        <i class="fas fa-bolt"></i>
+        <h3>Lightning Speed</h3>
+        <p>Experience real-time messaging with ultra-fast performance, keeping you connected.</p>
+      </div>
+      <div class="feature">
+        <i class="fas fa-robot"></i>
+        <h3>Futuristic Tech</h3>
+        <p>Stay ahead with innovative features and AI-driven functionalities that enhance your communication.</p>
+      </div>
+      <div class="feature">
+        <i class="fas fa-globe"></i>
+        <h3>Global Connectivity</h3>
+        <p>Connect with friends and colleagues worldwide through a seamless and secure network.</p>
+      </div>
+    </div>
+  </section>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
 
-        function howToPlay() {
-            window.location.href = "how_to_play.html";
-        }
-
-        function openSettings() {
-            window.location.href = "settings.html"
-        }
-    </script>
+  <script>
+    function proceed() {
+      var username = document.getElementById('username').value;
+      if (username.trim() === '') {
+        alert('Please enter a username.');
+      } else {
+        alert('Welcome, ' + username + '!');
+        // Additional login or navigation functionality can be added here.
+      }
+    }
+  </script>
 </body>
 </html>
